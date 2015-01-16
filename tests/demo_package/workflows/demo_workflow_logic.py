@@ -17,21 +17,16 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
+
 """Implements a workflow for testing."""
 
-from invenio_workflows.tasks.logic_tasks import (
-    compare_logic,
-    end_for,
-    foreach,
-    simple_for,
-    workflow_else,
-    workflow_if,
-)
-from invenio_workflows.tasks.sample_tasks import (
-    add_data,
-    get_data,
-    set_obj_extra_data_key,
-)
+from workflow.tasks.logic_tasks import (end_for,
+                                        foreach,
+                                        simple_for,
+                                        workflow_else,
+                                        workflow_if,
+                                        compare_logic,)
+from workflow.tasks.sample_tasks import add_data
 
 from invenio_workflows.tasks.workflows_tasks import interrupt_workflow
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+#
 # This file is part of Invenio.
-# Copyright (C) 2014 CERN.
+# Copyright (C) 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -21,7 +22,7 @@
 from invenio_workflows.tasks.workflows_tasks import (start_async_workflow, workflows_reviews,
                                                      wait_for_a_workflow_to_complete)
 
-from invenio_workflows.tasks.logic_tasks import simple_for, end_for
+from workflow.tasks.logic_tasks import simple_for, end_for
 
 
 class demo_workflow_workflows_errors(object):

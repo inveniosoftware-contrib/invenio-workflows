@@ -19,7 +19,8 @@
 
 """Implement a workflow for testing."""
 
-from invenio_workflows.tasks.sample_tasks import halt_whatever
+# FIXME: This belongs to workflow
+from workflow.tasks.sample_tasks import halt_whatever
 
 
 class demo_workflow_dummy(object):

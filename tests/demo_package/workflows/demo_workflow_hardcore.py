@@ -18,7 +18,7 @@
 
 """ Implements a workflow for testing."""
 
-from invenio_workflows.tasks.sample_tasks import task_reduce_and_halt, sleep_task
+from workflow.tasks.sample_tasks import task_reduce_and_halt, sleep_task
 
 
 class demo_workflow_hardcore(object):

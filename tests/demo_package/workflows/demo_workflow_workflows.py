@@ -36,6 +36,10 @@ from invenio_workflows.tasks.workflows_tasks import (
     workflows_reviews,
 )
 
+from workflow.tasks.logic_tasks import simple_for, end_for, workflow_if, workflow_else
+
+from invenio_workflows.tasks.marcxml_tasks import set_obj_extra_data_key
+
 
 class demo_workflow_workflows(object):
 

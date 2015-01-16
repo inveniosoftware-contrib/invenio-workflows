@@ -19,7 +19,7 @@
 
 """Implement a workflow for testing."""
 
-from invenio_workflows.tasks.sample_tasks import task_b, add_data, generate_error
+from workflow.tasks.sample_tasks import task_b, add_data, generate_error
 
 
 class demo_workflow_error(object):
