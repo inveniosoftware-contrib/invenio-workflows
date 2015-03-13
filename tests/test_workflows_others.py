@@ -72,7 +72,6 @@ class WorkflowOthers(WorkflowTasksTestCase):
 
     def test_workflows_exceptions(self):
         """Test for workflows exception."""
-        from invenio_workflows.errors import WorkflowError
         from invenio_workflows.api import start
         from workflow.errors import WorkflowError
 
