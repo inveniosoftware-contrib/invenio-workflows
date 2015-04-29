@@ -21,15 +21,15 @@
 
 import msgpack
 
-from flask import current_app, jsonify
 from functools import wraps
+from flask import current_app, jsonify, render_template
 from operator import attrgetter
 from six import text_type
 
 from invenio.base.helpers import unicodifier
 from invenio.ext.cache import cache
 
-from .registry import workflows
+from .registry import actions, workflows
 
 
 def convert_marcxml_to_bibfield(marcxml, model=None):
@@ -280,10 +280,11 @@ def get_formatted_holdingpen_object(bwo, date_format='%Y-%m-%d %H:%M:%S.%f'):
             return results
     results = generate_formatted_holdingpen_object(bwo)
     if results:
-        cache.set(
-            "workflows_holdingpen_{0}".format(
-                bwo.id),
-            msgpack.dumps(results))
+        cache.set("workflows_holdingpen_{0}".format(bwo.id),
+                  msgpack.dumps(results),
+                  timeout=current_app.config.get(
+                      "WORKFLOWS_HOLDING_PEN_CACHE_TIMEOUT"
+                  ))
     return results
 
 
@@ -300,11 +301,22 @@ def generate_formatted_holdingpen_object(
     else:
         workflow_definition = WorkflowBase
 
+    bwo.data = bwo.get_data()
+    bwo.extra_data = bwo.get_extra_data()
+
+    action_name = bwo.get_action() or ""
+    action = actions.get(action_name, None)
+    mini_action = getattr(action, "render_mini", "")
+    if mini_action:
+        mini_action = action().render_mini(bwo)
+
     results = {
         "name": workflows_name,
         "description": workflow_definition.get_description(bwo),
         "title": workflow_definition.get_title(bwo),
-        "date": bwo.modified.strftime(date_format)
+        "date": bwo.modified.strftime(date_format),
+        "additional": workflow_definition.get_additional(bwo),
+        "action": mini_action
     }
     return results
 
@@ -408,8 +420,6 @@ def get_action_list(object_list):
     Get a dictionary mapping from action name to number of Pending
     actions (i.e. halted objects). Used in the holdingpen.index page.
     """
-    from .registry import actions
-
     action_dict = {}
     found_actions = []
 
@@ -433,8 +443,6 @@ def get_action_list(object_list):
 
 def get_rendered_task_results(obj):
     """Return a list of rendered results from BibWorkflowObject task results."""
-    from flask import render_template
-
     results = {}
     for name, res in obj.get_tasks_results().items():
         for result in res:
@@ -444,6 +452,25 @@ def get_rendered_task_results(obj):
                 obj=obj
             )
     return results
+
+
+def get_rendered_row(bwo):
+    """Return a single formatted row."""
+    preformatted = get_formatted_holdingpen_object(bwo)
+    return render_template(
+        'workflows/list_row.html',
+        title=preformatted.get("title", ""),
+        object=bwo,
+        action=preformatted.get("action", ""),
+        description=preformatted.get("description", ""),
+        additional=preformatted.get("additional", "")
+    )
+
+
+def get_rows(object_list):
+    """Return all rows formatted."""
+    return [get_rendered_row(bwo)
+            for bwo in object_list]
 
 
 def get_previous_next_objects(object_list, current_object_id):
