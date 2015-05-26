@@ -29,7 +29,6 @@ from invenio.base.globals import cfg
 from .utils import BibWorkflowObjectIdContainer
 from invenio.modules.workflows.models import DbWorkflowObject
 from invenio.modules.workflows.errors import WorkflowWorkerError
-from workflow.engine_db import ObjectStatus
 
 from .utils import BibWorkflowObjectIdContainer
 
@@ -320,7 +319,7 @@ def resume_objects_in_workflow(id_workflow, start_point="continue_next",
     # Resume workflow if there are objects to resume
     objects = DbWorkflowObject.query.filter(
         DbWorkflowObject.id_workflow == id_workflow,
-        DbWorkflowObject.version == ObjectStatus.HALTED
+        DbWorkflowObject.version == DbWorkflowObject.version.type.choices.HALTED
     ).all()
     for obj in objects:
         yield continue_oid(oid=obj.id, start_point=start_point,

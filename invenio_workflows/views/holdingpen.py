@@ -259,7 +259,7 @@ def details(objectid):
 
     history_objects = {}
     temp = groupby(history_objects_db_request,
-                   lambda x: x.version)
+                   lambda x: x.status)
     for key, value in temp:
         if key != ObjectStatus.RUNNING:
             value = list(value)
@@ -268,8 +268,8 @@ def details(objectid):
 
     history_objects = sum(history_objects.values(), [])
     for obj in history_objects:
-        obj._class = HOLDINGPEN_WORKFLOW_STATES[obj.version]["class"]
-        obj.message = HOLDINGPEN_WORKFLOW_STATES[obj.version]["message"]
+        obj._class = HOLDINGPEN_WORKFLOW_STATES[obj.status]["class"]
+        obj.message = HOLDINGPEN_WORKFLOW_STATES[obj.status]["message"]
     results = get_rendered_task_results(bwobject)
     workflow_definition = get_workflow_info(extracted_data['workflow_func'])
     task_history = bwobject.get_extra_data().get('_task_history', [])

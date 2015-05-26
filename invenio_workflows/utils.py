@@ -23,7 +23,6 @@ from functools import wraps
 from flask import current_app, jsonify, render_template
 from operator import attrgetter
 from six import text_type
-from .models import ObjectStatus
 
 from sqlalchemy import or_
 
@@ -209,7 +208,7 @@ def get_holdingpen_objects(ptags=None):
     Uses DataTable naming for filtering/sorting. Work in progress.
     """
     if ptags is None:
-        ptags = ObjectStatus.name_from_version(ObjectStatus.HALTED)
+        ptags = DbWorkflowObject.version.type.choices.HALTED.label
 
     tags_copy = ptags[:]
     version_showing = []
@@ -217,8 +216,8 @@ def get_holdingpen_objects(ptags=None):
     uri_showing = []
     status_showing = []
     for tag in ptags:
-        if tag in ObjectStatus:
-            version_showing.append(ObjectStatus.MAPPING[tag])
+        if tag in DbWorkflowObject.version.type.choices:
+            version_showing.append(DbWorkflowObject.version.type.choices.MAPPING[tag])
             tags_copy.remove(tag)
         elif tag.startswith("type:"):
             type_showing.append(":".join(tag.split(":")[1:]))
@@ -276,9 +275,8 @@ def get_versions_from_tags(tags):
     tags_copy = tags[:]
     version_showing = []
     for i in range(len(tags_copy) - 1, -1, -1):
-        if tags_copy[i] in ObjectStatus.MAPPING:
-            version_showing.append(ObjectStatus.MAPPING[tags_copy[i]])
-            del tags_copy[i]
+        if tags_copy[i] in DbWorkflowObject.version.type.choices.MAPPING:
+            version_showing.append(DbWorkflowObject.version.type.choices.MAPPING[tags_copy[i]])
     return version_showing, tags_copy
 
 
