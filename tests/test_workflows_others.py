@@ -20,7 +20,24 @@
 
 """ Test for workflow not fitting in other categories."""
 
-from test_workflows import WorkflowTasksTestCase
+from invenio.testsuite import make_test_suite, run_test_suite
+
+from .test_workflows import WorkflowTasksTestCase
+import sys
+from six import StringIO
+from contextlib import contextmanager
+
+
+@contextmanager
+def redirect_stderr():
+    """Redirect stderr to a StringIO instance."""
+    old_stderr = sys.stderr
+    old_stderr.flush()
+    sio = StringIO()
+    sys.stderr = sio
+    yield sio
+    sio.close()
+    sys.stderr = old_stderr
 
 
 class WorkflowOthers(WorkflowTasksTestCase):
@@ -69,10 +86,17 @@ class WorkflowOthers(WorkflowTasksTestCase):
         from invenio_workflows.api import start
         from workflow.errors import WorkflowError
 
-        with self.assertRaises(WorkflowError) as e:
-            start("demo_workflow_error", [2],
-                  module_name="unit_tests")
-            self.assertTrue("ZeroDivisionError" in e.message)
-            self.assertTrue("call_a()" in e.message)
-            self.assertTrue("call_b()" in e.message)
-            self.assertTrue("call_c()" in e.message)
+        with redirect_stderr() as stderr:
+            with self.assertRaises(WorkflowError) as e:
+                stderr.seek(0)
+                start("demo_workflow_error", [2],
+                      module_name="unit_tests")
+                self.assertTrue("ZeroDivisionError" in e.message)
+                self.assertTrue("call_a()" in e.message)
+                self.assertTrue("call_b()" in e.message)
+                self.assertTrue("call_c()" in e.message)
+
+TEST_SUITE = make_test_suite(WorkflowOthers)
+
+if __name__ == "__main__":
+    run_test_suite(TEST_SUITE)
