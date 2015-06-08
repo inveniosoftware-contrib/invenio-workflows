@@ -24,7 +24,6 @@ from test_workflows import WorkflowTasksTestCase
 
 
 class WorkflowOthers(WorkflowTasksTestCase):
-
     """Class to test the other tasks and workflows."""
 
     def setUp(self):
@@ -42,12 +41,12 @@ class WorkflowOthers(WorkflowTasksTestCase):
         """Test abastraction layer for celery worker."""
         from invenio_ext.sqlalchemy import db
         from invenio_workflows.utils import BibWorkflowObjectIdContainer
-        from invenio_workflows.models import BibWorkflowObject
+        from invenio_workflows.models import DbWorkflowObject
         from invenio_workflows.worker_result import AsynchronousResultWrapper
 
         bwoic = BibWorkflowObjectIdContainer(None)
         self.assertEqual(None, bwoic.get_object())
-        test_object = BibWorkflowObject()
+        test_object = DbWorkflowObject()
         test_object.set_data(45)
         test_object.save()
         bwoic2 = BibWorkflowObjectIdContainer(test_object)
@@ -63,18 +62,19 @@ class WorkflowOthers(WorkflowTasksTestCase):
     def test_acces_to_undefineworkflow(self):
         """Test of access to undefined workflow."""
         from invenio_workflows.api import start
+        from workflow.errors import WorkflowDefinitionError
+
         try:
             start("@thisisnotatrueworkflow@", ["my_false_data"],
                   random_kay_args="value")
         except Exception as e:
-            from invenio_workflows.errors import \
-                WorkflowDefinitionError
             self.assertTrue(isinstance(e, WorkflowDefinitionError))
 
     def test_workflows_exceptions(self):
         """Test for workflows exception."""
         from invenio_workflows.errors import WorkflowError
         from invenio_workflows.api import start
+        from workflow.errors import WorkflowError
 
         try:
             start("demo_workflow_error", [2],

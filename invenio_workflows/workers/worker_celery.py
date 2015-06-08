@@ -19,9 +19,9 @@
 
 from invenio_base.helpers import with_app_context
 
-from invenio_celery import celery
-
-from invenio_ext.sqlalchemy.utils import session_manager
+from invenio.base.helpers import with_app_context
+from invenio.celery import celery
+from invenio.ext.sqlalchemy.utils import session_manager
 
 from invenio_workflows.errors import WorkflowWorkerError
 from invenio_workflows.worker_result import AsynchronousResultWrapper

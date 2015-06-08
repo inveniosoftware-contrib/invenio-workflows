@@ -18,14 +18,24 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 """Various utility functions for use across the workflows module."""
-
 from functools import wraps
 
+from flask import current_app, jsonify, render_template
 from operator import attrgetter
+from six import text_type
+from .models import ObjectStatus
+
+from sqlalchemy import or_
+
+from invenio.base.helpers import unicodifier
+from invenio.base.wrappers import lazy_import
+from invenio.ext.cache import cache
 
 from flask import current_app, jsonify, render_template
 
-from invenio_base.helpers import unicodifier
+DbWorkflowObject = lazy_import("invenio.modules.workflows.models.DbWorkflowObject")
+Workflow = lazy_import("invenio.modules.workflows.models.Workflow")
+
 
 from invenio_ext.cache import cache
 
@@ -42,7 +52,7 @@ from .registry import actions, workflows
 
 class BibWorkflowObjectIdContainer(object):
 
-    """Mapping from an ID to BibWorkflowObject.
+    """Mapping from an ID to DbWorkflowObject.
 
     This class is only used to be able to store a workflow ID and
     to retrieve easily the workflow from this ID from another process,
@@ -53,19 +63,19 @@ class BibWorkflowObjectIdContainer(object):
     """
 
     def __init__(self, bibworkflowobject=None):
-        """Initialize the object, optionally passing a BibWorkflowObject."""
+        """Initialize the object, optionally passing a DbWorkflowObject."""
         if bibworkflowobject is not None:
             self.id = bibworkflowobject.id
         else:
             self.id = None
 
     def get_object(self):
-        """Get the BibWorkflowObject from self.id."""
-        from .models import BibWorkflowObject
+        """Get the DbWorkflowObject from self.id."""
+        from invenio.modules.workflows.models import DbWorkflowObject
 
         if self.id is not None:
-            return BibWorkflowObject.query.filter(
-                BibWorkflowObject.id == self.id
+            return DbWorkflowObject.query.filter(
+                DbWorkflowObject.id == self.id
             ).one()
         else:
             return None
@@ -194,15 +204,12 @@ def parse_bwids(bwolist):
 
 
 def get_holdingpen_objects(ptags=None):
-    """Get BibWorkflowObject's for display in Holding Pen.
+    """Get DbWorkflowObject's for display in Holding Pen.
 
     Uses DataTable naming for filtering/sorting. Work in progress.
     """
-    from .models import (BibWorkflowObject,
-                         ObjectVersion)
-
     if ptags is None:
-        ptags = ObjectVersion.name_from_version(ObjectVersion.HALTED)
+        ptags = ObjectStatus.name_from_version(ObjectStatus.HALTED)
 
     tags_copy = ptags[:]
     version_showing = []
@@ -210,8 +217,8 @@ def get_holdingpen_objects(ptags=None):
     uri_showing = []
     status_showing = []
     for tag in ptags:
-        if tag in ObjectVersion.MAPPING:
-            version_showing.append(ObjectVersion.MAPPING[tag])
+        if tag in ObjectStatus:
+            version_showing.append(ObjectStatus.MAPPING[tag])
             tags_copy.remove(tag)
         elif tag.startswith("type:"):
             type_showing.append(":".join(tag.split(":")[1:]))
@@ -224,14 +231,15 @@ def get_holdingpen_objects(ptags=None):
             tags_copy.remove(tag)
 
     ssearch = tags_copy
-    bwobject_list = BibWorkflowObject.query.filter(
-        BibWorkflowObject.id_parent == None  # noqa E711
-    ).filter(not version_showing or BibWorkflowObject.version.in_(version_showing),
-        or_(*[BibWorkflowObject.data_type.like(type_.replace("*", "%"))
+
+    bwobject_list = DbWorkflowObject.query.filter(
+        DbWorkflowObject.id_parent == None  # noqa E711
+    ).filter(not version_showing or DbWorkflowObject.version.in_(version_showing),
+        or_(*[DbWorkflowObject.data_type.like(type_.replace("*", "%"))
               for type_ in type_showing]),
-        or_(*[BibWorkflowObject.uri.like(uri.replace("*", "%"))
+        or_(*[DbWorkflowObject.uri.like(uri.replace("*", "%"))
               for uri in uri_showing]),
-        or_(*[BibWorkflowObject.status.like(status.replace("*", "%"))
+        or_(*[DbWorkflowObject.status.like(status.replace("*", "%"))
               for status in status_showing])
     ).all()
 
@@ -265,13 +273,11 @@ def get_versions_from_tags(tags):
     :param tags: list of tags
     :return: tuple of (versions to show, cleaned tags list)
     """
-    from .models import ObjectVersion
-
     tags_copy = tags[:]
     version_showing = []
     for i in range(len(tags_copy) - 1, -1, -1):
-        if tags_copy[i] in ObjectVersion.MAPPING:
-            version_showing.append(ObjectVersion.MAPPING[tags_copy[i]])
+        if tags_copy[i] in ObjectStatus.MAPPING:
+            version_showing.append(ObjectStatus.MAPPING[tags_copy[i]])
             del tags_copy[i]
     return version_showing, tags_copy
 
@@ -384,12 +390,11 @@ def extract_data(bwobject):
     Used for rendering the Record's holdingpen table row and
     details and action page.
     """
-    from .models import (BibWorkflowObject,
-                         Workflow)
+    from invenio.modules.workflows.models import Workflow
     extracted_data = {}
     if bwobject.id_parent is not None:
         extracted_data['bwparent'] = \
-            BibWorkflowObject.query.get(bwobject.id_parent)
+            DbWorkflowObject.query.get(bwobject.id_parent)
     else:
         extracted_data['bwparent'] = None
 

@@ -44,8 +44,8 @@ define(
         delete_url: "",
         restart_url: "",
 
-        // BibWorkflowObject id
-        id_object: ""
+        // DbWorkflowObject id
+        id_object: "",
       });
 
       this.handleAction = function(ev, data) {
