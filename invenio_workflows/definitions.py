@@ -36,7 +36,9 @@ class WorkflowBase(object):
     """Base class for workflow definition.
 
     Interface to define which functions should be imperatively implemented.
-    All workflows should inherit from this class.
+
+    All workflows intended to work well with Holding Pen should inherit from
+    this class.
     """
 
     @staticmethod
@@ -59,6 +61,11 @@ class WorkflowBase(object):
         """Format the object."""
         return "No data"
 
+    @staticmethod
+    def get_sort_data(obj, **kwargs):
+        """Return a dictionary of key values useful for sorting in Holding Pen."""
+        return {}
+
 
 class RecordWorkflow(WorkflowBase):
 
@@ -70,7 +77,10 @@ class RecordWorkflow(WorkflowBase):
     def get_title(bwo):
         """Get the title."""
         field_map = {"title": "title"}
-        record = bwo.data
+        try:
+            record = bwo.data
+        except AttributeError:
+            record = bwo.get_data()
         extracted_titles = []
         if hasattr(record, "get") and "title" in record:
             if isinstance(record["title"], str):
@@ -84,7 +94,10 @@ class RecordWorkflow(WorkflowBase):
         """Get the description (identifiers and categories) from the object data."""
         from flask import render_template
 
-        record = bwo.data
+        try:
+            record = bwo.data
+        except AttributeError:
+            record = bwo.get_data()
         # Get identifiers
         final_identifiers = []
         categories = []
@@ -121,7 +134,11 @@ class RecordWorkflow(WorkflowBase):
         from pprint import pformat
         from invenio_records.api import Record
 
-        data = bwo.data
+        try:
+            data = bwo.data
+        except AttributeError:
+            data = bwo.get_data()
+
         if not data:
             return ''
 
