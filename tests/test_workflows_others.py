@@ -22,7 +22,7 @@
 
 from invenio.testsuite import make_test_suite, run_test_suite
 
-from .test_workflows import WorkflowTasksTestCase
+from test_workflows import WorkflowTasksTestCase
 import sys
 from six import StringIO
 from contextlib import contextmanager

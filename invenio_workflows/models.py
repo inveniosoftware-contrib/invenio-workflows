@@ -462,9 +462,8 @@ class DbWorkflowObject(db.Model):
                             default=_encoded_default_extra_data)
 
     _id_workflow = db.Column(db.String(36),
-                             db.ForeignKey('bwlWORKFLOW.uuid'), ondelete='CASCADE',
-                             nullable=True,
-                             name="id_workflow")
+                             db.ForeignKey("bwlWORKFLOW.uuid", ondelete='CASCADE'),
+                             nullable=True, name="id_workflow")
 
     status = db.Column(ChoiceType(ObjectStatus, impl=db.Integer()),
                        default=ObjectStatus.INITIAL, nullable=False,
@@ -490,7 +489,7 @@ class DbWorkflowObject(db.Model):
                                  backref='bibworkflowobject',
                                  cascade="all, delete-orphan")
 
-    callback_pos = db.Column(CallbackPosType())  # ex-task_counter
+    callback_pos = db.Column(CallbackPosType(), default=[])  # ex-task_counter
 
     workflow = db.relationship(
         Workflow, foreign_keys=[_id_workflow], remote_side=Workflow.uuid,
