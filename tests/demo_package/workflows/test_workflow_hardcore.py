@@ -18,37 +18,15 @@
 
 """ Implements a workflow for testing."""
 
-from ...tasks.logic_tasks import (end_for, foreach, simple_for, workflow_else,
-                                  workflow_if, compare_logic,)
-from ...tasks.sample_tasks import add_data
-
-from ...tasks.workflows_tasks import interrupt_workflow
-
-from ...tasks.marcxml_tasks import get_data, set_obj_extra_data_key
+from invenio_workflows.tasks.sample_tasks import task_reduce_and_halt, sleep_task
 
 
-class test_workflow_logic(object):
+class test_workflow_hardcore(object):
 
     """Test workflow for unit-tests."""
 
     workflow = [
-        foreach([0, 1, 4, 10], "step", True),
-        [
-            simple_for(0, 4, 1, "Iterator"),
-            [
-                add_data(1),
-            ],
-            end_for,
-            workflow_if(compare_logic(get_data, 9, "gte")),
-            [
-                set_obj_extra_data_key("test", "gte9"),
-                interrupt_workflow
-            ],
-            workflow_else,
-            [
-                set_obj_extra_data_key("test", "lt9"),
-                interrupt_workflow
-            ],
-        ],
-        end_for,
+        sleep_task(0.001),
+        task_reduce_and_halt,
+        sleep_task(1)
     ]

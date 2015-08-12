@@ -17,14 +17,15 @@
 
 from redis import Redis
 from rq.decorators import job
-from invenio.modules.workflows.worker_result import AsynchronousResultWrapper
+from invenio_workflows.worker_result import AsynchronousResultWrapper
 from ..worker_engine import run_worker, restart_worker, continue_worker
 
-#FIXME: add configuration variables
+# FIXME: add configuration variables
 redis_conn = Redis()
 
 
 class worker_redis(object):
+
     def run_worker(self, workflow_name, data, **kwargs):
         """
         Registers run_worker function as a new task in RQ

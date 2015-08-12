@@ -104,7 +104,8 @@ def do_upgrade():
             mysql_engine='MyISAM'
         )
     else:
-        warnings.warn("*** Creation of 'bwlWORKFLOWLOGGING' table skipped! ***")
+        warnings.warn(
+            "*** Creation of 'bwlWORKFLOWLOGGING' table skipped! ***")
 
     if not op.has_table('bwlOBJECTLOGGING'):
         op.create_table(
@@ -131,7 +132,11 @@ def estimate():
 
 def pre_upgrade():
     """Run pre-upgrade checks (optional)."""
-    tables = ["bwlWORKFLOW", "bwlOBJECT", "bwlWORKFLOWLOGGING", "bwlOBJECTLOGGING"]
+    tables = [
+        "bwlWORKFLOW",
+        "bwlOBJECT",
+        "bwlWORKFLOWLOGGING",
+        "bwlOBJECTLOGGING"]
     for table in tables:
         if op.has_table(table):
             warnings.warn(

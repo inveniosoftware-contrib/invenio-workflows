@@ -51,11 +51,11 @@ class WorkerBackend(object):
         :return: the worker configured into the configuration file.
         """
         try:
-            return import_string('invenio.modules.workflows.workers.%s:%s' % (
+            return import_string('invenio_workflows.workers.%s:%s' % (
                 cfg['CFG_BIBWORKFLOW_WORKER'], cfg['CFG_BIBWORKFLOW_WORKER']))
         except:
             from invenio.ext.logging import register_exception
-            ## Let's report about broken plugins
+            # Let's report about broken plugins
             register_exception(alert_admin=True)
 
     def __call__(self, *args, **kwargs):

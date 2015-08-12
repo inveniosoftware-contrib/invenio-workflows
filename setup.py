@@ -91,7 +91,7 @@ setup(
     version=version,
     description=__doc__,
     long_description=readme + '\n\n' + history,
-    keywords='invenio TODO',
+    keywords='invenio workflows',
     license='GPLv2',
     author='CERN',
     author_email='info@invenio-software.org',

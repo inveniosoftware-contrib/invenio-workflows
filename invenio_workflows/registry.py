@@ -23,6 +23,7 @@ from flask_registry import RegistryError, RegistryProxy
 
 
 class WorkflowsRegistry(DictModuleAutoDiscoverySubRegistry):
+
     def keygetter(self, key, orig_value, class_):
         return class_.__name__ \
             if hasattr(class_, '__name__') and key is None else key

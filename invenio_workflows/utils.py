@@ -187,7 +187,9 @@ def sort_bwolist(bwolist, iSortCol_0, sSortDir_0):
     elif iSortCol_0 == 2:
         bwolist.sort(key=_sort_from_cache("title"), reverse=should_we_reverse)
     elif iSortCol_0 == 3:
-        bwolist.sort(key=_sort_from_cache("description"), reverse=should_we_reverse)
+        bwolist.sort(
+            key=_sort_from_cache("description"),
+            reverse=should_we_reverse)
     elif iSortCol_0 == 4:
         bwolist.sort(key=lambda x: x.created, reverse=should_we_reverse)
     elif iSortCol_0 == 5:
@@ -276,16 +278,23 @@ def get_formatted_holdingpen_object(bwo, date_format='%Y-%m-%d %H:%M:%S.%f'):
     """Return the formatted output, from cache if available."""
     results = cache.get("workflows_holdingpen_{0}".format(bwo.id))
     if results:
-        results = msgpack.loads(cache.get("workflows_holdingpen_{0}".format(bwo.id)))
+        results = msgpack.loads(
+            cache.get(
+                "workflows_holdingpen_{0}".format(
+                    bwo.id)))
         if results["date"] == bwo.modified.strftime(date_format):
             return results
     results = generate_formatted_holdingpen_object(bwo)
     if results:
-        cache.set("workflows_holdingpen_{0}".format(bwo.id), msgpack.dumps(results))
+        cache.set(
+            "workflows_holdingpen_{0}".format(
+                bwo.id),
+            msgpack.dumps(results))
     return results
 
 
-def generate_formatted_holdingpen_object(bwo, date_format='%Y-%m-%d %H:%M:%S.%f'):
+def generate_formatted_holdingpen_object(
+        bwo, date_format='%Y-%m-%d %H:%M:%S.%f'):
     """Generate a dict with formatted column data from Holding Pen object."""
     from .definitions import WorkflowBase
 
@@ -384,7 +393,8 @@ def extract_data(bwobject):
     extracted_data['w_metadata'] = \
         Workflow.query.filter(Workflow.uuid == bwobject.id_workflow).first()
     if extracted_data['w_metadata']:
-        workflow_def = get_workflow_definition(extracted_data['w_metadata'].name)
+        workflow_def = get_workflow_definition(
+            extracted_data['w_metadata'].name)
         extracted_data['workflow_func'] = workflow_def
     else:
         extracted_data['workflow_func'] = []

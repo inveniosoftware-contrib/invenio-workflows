@@ -18,7 +18,7 @@
 
 """ Implements a workflow for testing. """
 
-from ...tasks.workflows_tasks import (
+from invenio_workflows.tasks.workflows_tasks import (
     start_async_workflow,
     workflows_reviews,
     wait_for_a_workflow_to_complete,
@@ -28,9 +28,9 @@ from ...tasks.workflows_tasks import (
     wait_for_workflows_to_complete
 )
 
-from ...tasks.logic_tasks import simple_for, end_for, workflow_if, workflow_else
+from invenio_workflows.tasks.logic_tasks import simple_for, end_for, workflow_if, workflow_else
 
-from invenio.modules.workflows.tasks.marcxml_tasks import set_obj_extra_data_key
+from invenio_workflows.tasks.marcxml_tasks import set_obj_extra_data_key
 
 
 class test_workflow_workflows(object):

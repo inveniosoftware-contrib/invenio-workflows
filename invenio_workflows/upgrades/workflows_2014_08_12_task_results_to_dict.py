@@ -55,7 +55,7 @@ def do_upgrade():
                 'result': self.result
             }
 
-    from invenio.modules.workflows import utils
+    from invenio_workflows import utils
     utils.WorkflowsTaskResult = WorkflowsTaskResult
 
     all_data_objects = run_sql("SELECT id, _extra_data FROM bwlOBJECT")

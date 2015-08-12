@@ -90,7 +90,11 @@ class RecordWorkflow(WorkflowBase):
             current_app.logger.exception("Could not get identifiers")
             if hasattr(record, "get"):
                 final_identifiers = [
-                    record.get("system_control_number", {}).get("value", 'No ids')
+                    record.get(
+                        "system_control_number",
+                        {}).get(
+                        "value",
+                        'No ids')
                 ]
             else:
                 final_identifiers = []

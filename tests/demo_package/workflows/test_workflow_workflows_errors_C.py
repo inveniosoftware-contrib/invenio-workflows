@@ -18,10 +18,10 @@
 
 """ Implements a workflow for testing """
 
-from ...tasks.workflows_tasks import (start_async_workflow, workflows_reviews,
-                                      wait_for_workflows_to_complete)
+from invenio_workflows.tasks.workflows_tasks import (start_async_workflow, workflows_reviews,
+                                                     wait_for_workflows_to_complete)
 
-from invenio.modules.workflows.tasks.logic_tasks import simple_for, end_for
+from invenio_workflows.tasks.logic_tasks import simple_for, end_for
 
 
 class test_workflow_workflows_errors_C(object):

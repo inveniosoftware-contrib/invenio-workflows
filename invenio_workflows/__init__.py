@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2013, 2014 CERN.
+# Copyright (C) 2013, 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+
 r"""
 This module allows you to easily push your data through a determined set of tasks
 and stop/continue execution if necessary.
@@ -36,7 +37,7 @@ Create a workflow for your data using functions as individual tasks.
 
 .. code-block:: python
 
-    from invenio.modules.workflows.tasks.sample_tasks import (
+    from invenio_workflows.tasks.sample_tasks import (
         add_data,
         halt_if_higher_than_20,
     )
@@ -133,7 +134,7 @@ Run a single data object
 
 .. code-block:: python
 
-    from invenio.modules.workflows.models import BibWorkflowObject
+    from invenio_workflows.models import BibWorkflowObject
     myobj = BibWorkflowObject.create_object()
     myobj.set_data(10)
     eng = myobj.start_workflow("myworkflow")
@@ -159,7 +160,7 @@ a list of objects:
 
 .. code-block:: python
 
-    from invenio.modules.workflows.api import start
+    from invenio_workflows.api import start
     eng = start(workflow_name="myworkflow", data=[5, 10])
 
 *Here we are passing simple data objects in form integers.*

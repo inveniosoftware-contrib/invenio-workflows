@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2012, 2013, 2014 CERN.
+# Copyright (C) 2012, 2013, 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -17,16 +17,16 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""Implement an example of a typical ingestion workflow for MARCXML records."""
+"""Example of a typical ingestion workflow for MARCXML records."""
 
-from ...workflows.tasks.marcxml_tasks import (
+from ..tasks.marcxml_tasks import (
     approve_record,
     convert_record,
 )
 from ..definitions import WorkflowBase
 
 
-class marcxml_workflow(WorkflowBase):
+class marcxml_workflow(WorkflowBase):  # noqa
 
     """This workflow converts MARCXML records and waits for approval."""
 

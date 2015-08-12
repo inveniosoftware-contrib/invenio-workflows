@@ -17,15 +17,7 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""
-    invenio.modules.workflows.views.settings
-    ----------------------------------------
-
-    Represents the Holding Pen on user settings page with overview
-    over any actions assigned to user.
-
-    WORK IN PROGRESS
-"""
+"""User settings page with overview over any actions assigned to user."""
 
 from __future__ import absolute_import
 

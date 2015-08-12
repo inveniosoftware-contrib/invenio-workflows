@@ -21,8 +21,8 @@
 from functools import wraps
 from time import sleep
 
-from invenio.modules.workflows.errors import WorkflowError
-from invenio.modules.workflows.models import BibWorkflowEngineLog
+from ..errors import WorkflowError
+from ..models import BibWorkflowEngineLog
 
 from six import callable, string_types
 
@@ -76,7 +76,8 @@ def num_workflow_running_greater(num):
     @wraps(num_workflow_running_greater)
     def _num_workflow_running_greater(obj, eng):
         try:
-            if (eng.extra_data["_nb_workflow"] - eng.extra_data["_nb_workflow_finish"]) > num:
+            if (eng.extra_data["_nb_workflow"] -
+                    eng.extra_data["_nb_workflow_finish"]) > num:
                 return True
             else:
                 return False
@@ -89,7 +90,8 @@ def num_workflow_running_greater(num):
 def get_nb_workflow_running(obj, eng):
     """Get number of workflow in the message queue."""
     try:
-        return eng.extra_data["_nb_workflow"] - eng.extra_data["_nb_workflow_finish"]
+        return eng.extra_data["_nb_workflow"] - \
+            eng.extra_data["_nb_workflow_finish"]
     except KeyError:
         return "0"
 
@@ -122,8 +124,8 @@ def start_async_workflow(workflow_to_run="",
         workflow to run (optional).
     :type get_workflow_from_engine_definition: function
     """
-    from ...workflows.models import BibWorkflowObject
-    from invenio.modules.workflows.api import start_delayed
+    from ..models import BibWorkflowObject
+    from ..api import start_delayed
 
     @wraps(start_async_workflow)
     def _start_workflow(obj, eng):
@@ -133,7 +135,8 @@ def start_async_workflow(workflow_to_run="",
         if preserve_extra_data_keys:
             record_object.extra_data = record_object.get_extra_data()
             for extra_data_key in preserve_extra_data_keys:
-                record_object.extra_data[extra_data_key] = obj.extra_data[extra_data_key]
+                record_object.extra_data[
+                    extra_data_key] = obj.extra_data[extra_data_key]
             record_object.set_extra_data(record_object.extra_data)
 
         if preserve_data:
@@ -269,7 +272,7 @@ def workflow_result_management(async_result, eng):
     get data.
     :param eng: workflow engine for logging and state change.
     """
-    from invenio.modules.workflows.worker_result import uuid_to_workflow
+    from ..worker_result import uuid_to_workflow
     try:
         engine = async_result.get(uuid_to_workflow)
         eng.extra_data["_nb_workflow_finish"] += 1
@@ -381,7 +384,8 @@ def get_workflows_progress(obj, eng):
     :param eng: BibWorkflowEngine processing the object
     """
     try:
-        return (eng.extra_data["_nb_workflow_finish"] * 100.0) / (eng.extra_data["_nb_workflow"])
+        return (eng.extra_data["_nb_workflow_finish"] *
+                100.0) / (eng.extra_data["_nb_workflow"])
     except KeyError:
         return "No progress (key missing)"
     except ZeroDivisionError:
@@ -414,7 +418,8 @@ def workflows_reviews(stop_if_error=False, clean=True):
         )
 
         eng.log.info("{0}/{1} finished successfully".format(
-            eng.extra_data["_nb_workflow_finish"], eng.extra_data["_nb_workflow"]
+            eng.extra_data["_nb_workflow_finish"], eng.extra_data[
+                "_nb_workflow"]
         ))
 
         if eng.extra_data["_nb_workflow"] == 0:
@@ -424,7 +429,9 @@ def workflows_reviews(stop_if_error=False, clean=True):
 
         if eng.extra_data["_nb_workflow_failed"] and stop_if_error:
             raise WorkflowError(
-                "%s / %s failed" % (eng.extra_data["_nb_workflow_failed"], eng.extra_data["_nb_workflow"]),
+                "%s / %s failed" % (
+                    eng.extra_data["_nb_workflow_failed"],
+                    eng.extra_data["_nb_workflow"]),
                 eng.uuid, obj.id, payload=eng.extra_data["_uuid_workflow_crashed"])
 
         if clean:

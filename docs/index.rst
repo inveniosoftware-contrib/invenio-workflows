@@ -30,6 +30,49 @@ Contents:
    :maxdepth: 2
 
 
+API
+===
+
+.. automodule:: invenio_workflows
+   :members:
+
+
+.. automodule:: invenio_workflows.api
+   :members:
+
+Models
+------
+
+.. automodule:: invenio_workflows.models
+   :members:
+
+
+Engine
+------
+
+.. automodule:: invenio_workflows.engine
+   :members:
+
+
+Workers
+-------
+
+.. automodule:: invenio_workflows.worker_engine
+   :members:
+
+.. automodule:: invenio_workflows.worker_result
+   :members:
+
+Views
+-----
+
+.. automodule:: invenio_workflows.views
+   :members:
+
+.. automodule:: invenio_workflows.views.holdingpen
+   :members:
+
+
 Indices and tables
 ==================
 

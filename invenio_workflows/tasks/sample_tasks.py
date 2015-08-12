@@ -28,7 +28,7 @@ def add_data(data_param):
     """Add data_param to obj.data."""
     @wraps(add_data)
     def _add_data(obj, eng):
-        #due to python 2 way of managing closure
+        # due to python 2 way of managing closure
         data = data_param
         obj.data += data
 

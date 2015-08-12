@@ -16,13 +16,30 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-""" Implements a workflow for testing. """
+""" Implements a workflow for testing."""
 
-from ...tasks.sample_tasks import halt_whatever
+from invenio_workflows.tasks.workflows_tasks import (start_async_workflow, workflows_reviews,
+                                                     wait_for_a_workflow_to_complete)
+
+from invenio_workflows.tasks.logic_tasks import simple_for, end_for
 
 
-class test_workflow_dummy(object):
+class test_workflow_workflows_errors(object):
 
-    """A test workflow for the testsuite."""
+    """Test workflow for unit-tests."""
 
-    workflow = [halt_whatever]
+    workflow = [
+        simple_for(0, 5, 1, "X"),
+        [
+            start_async_workflow("test_workflow_error"),
+        ],
+        end_for,
+
+        simple_for(0, 5, 1),
+        [
+            wait_for_a_workflow_to_complete(0.1),
+        ],
+        end_for,
+
+        workflows_reviews(False, False)
+    ]

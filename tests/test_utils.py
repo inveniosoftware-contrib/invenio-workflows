@@ -30,31 +30,31 @@ class HoldingPenUtilsTest(InvenioTestCase):
 
     def test_get_previous_next_objects_empty(self):
         """Test the getting of prev, next object ids from the list."""
-        from invenio.modules.workflows.utils import get_previous_next_objects
+        from invenio_workflows.utils import get_previous_next_objects
         objects = []
         self.assertEqual(get_previous_next_objects(objects, 1), (None, None))
 
     def test_get_previous_next_objects_not_there(self):
         """Test the getting of prev, next object ids from the list."""
-        from invenio.modules.workflows.utils import get_previous_next_objects
+        from invenio_workflows.utils import get_previous_next_objects
         objects = [3, 4]
         self.assertEqual(get_previous_next_objects(objects, 42), (None, None))
 
     def test_get_previous_next_objects_previous(self):
         """Test the getting of prev, next object ids from the list."""
-        from invenio.modules.workflows.utils import get_previous_next_objects
+        from invenio_workflows.utils import get_previous_next_objects
         objects = [3, 4]
         self.assertEqual(get_previous_next_objects(objects, 4), (3, None))
 
     def test_get_previous_next_objects_next(self):
         """Test the getting of prev, next object ids from the list."""
-        from invenio.modules.workflows.utils import get_previous_next_objects
+        from invenio_workflows.utils import get_previous_next_objects
         objects = [3, 4]
         self.assertEqual(get_previous_next_objects(objects, 3), (None, 4))
 
     def test_get_previous_next_objects_previous_next(self):
         """Test the getting of prev, next object ids from the list."""
-        from invenio.modules.workflows.utils import get_previous_next_objects
+        from invenio_workflows.utils import get_previous_next_objects
         objects = [3, 4, 5]
         self.assertEqual(get_previous_next_objects(objects, 4), (3, 5))
 

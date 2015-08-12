@@ -22,7 +22,7 @@
 
 from invenio.testsuite import make_test_suite, run_test_suite
 
-from .test_workflows import WorkflowTasksTestCase
+from test_workflows import WorkflowTasksTestCase
 
 
 class WorkflowOthers(WorkflowTasksTestCase):
@@ -35,7 +35,7 @@ class WorkflowOthers(WorkflowTasksTestCase):
 
     def tearDown(self):
         """ Clean up created objects."""
-        from invenio.modules.workflows.models import Workflow
+        from invenio_workflows.models import Workflow
         self.delete_objects(
             Workflow.get(Workflow.module_name == "unit_tests").all())
         self.cleanup_registries()
@@ -43,9 +43,9 @@ class WorkflowOthers(WorkflowTasksTestCase):
     def test_result_abstraction(self):
         """Test abastraction layer for celery worker."""
         from invenio.ext.sqlalchemy import db
-        from ..utils import BibWorkflowObjectIdContainer
-        from ..models import BibWorkflowObject
-        from ..worker_result import AsynchronousResultWrapper
+        from invenio_workflows.utils import BibWorkflowObjectIdContainer
+        from invenio_workflows.models import BibWorkflowObject
+        from invenio_workflows.worker_result import AsynchronousResultWrapper
 
         bwoic = BibWorkflowObjectIdContainer(None)
         self.assertEqual(None, bwoic.get_object())
@@ -64,19 +64,19 @@ class WorkflowOthers(WorkflowTasksTestCase):
 
     def test_acces_to_undefineworkflow(self):
         """Test of access to undefined workflow."""
-        from invenio.modules.workflows.api import start
+        from invenio_workflows.api import start
         try:
             start("@thisisnotatrueworkflow@", ["my_false_data"],
                   random_kay_args="value")
         except Exception as e:
-            from invenio.modules.workflows.errors import \
+            from invenio_workflows.errors import \
                 WorkflowDefinitionError
             self.assertTrue(isinstance(e, WorkflowDefinitionError))
 
     def test_workflows_exceptions(self):
         """Test for workflows exception."""
-        from invenio.modules.workflows.errors import WorkflowError
-        from invenio.modules.workflows.api import start
+        from invenio_workflows.errors import WorkflowError
+        from invenio_workflows.api import start
 
         try:
             start("test_workflow_error", [2],

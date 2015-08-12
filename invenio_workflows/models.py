@@ -114,7 +114,7 @@ class Workflow(db.Model):
     module_name = db.Column(db.String(64), nullable=False)
 
     child_logs = db.relationship("BibWorkflowEngineLog",
-                                 backref='bwlWORKFLOW',
+                                 # backref='bwlWORKFLOW',
                                  cascade="all, delete, delete-orphan")
 
     @db.hybrid_property

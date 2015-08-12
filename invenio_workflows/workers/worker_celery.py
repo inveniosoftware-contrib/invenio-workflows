@@ -22,11 +22,11 @@ from invenio.celery import celery
 from invenio.ext.sqlalchemy.utils import session_manager
 from invenio.base.helpers import with_app_context
 
-from invenio.modules.workflows.worker_result import AsynchronousResultWrapper
-from invenio.modules.workflows.errors import WorkflowWorkerError
+from invenio_workflows.worker_result import AsynchronousResultWrapper
+from invenio_workflows.errors import WorkflowWorkerError
 
 
-@celery.task(name='invenio.modules.workflows.workers.worker_celery.run_worker')
+@celery.task(name='invenio_workflows.workers.worker_celery.run_worker')
 @with_app_context()
 def celery_run(workflow_name, data, **kwargs):
     """Run the workflow with Celery."""
@@ -40,14 +40,15 @@ def celery_run(workflow_name, data, **kwargs):
         for i in range(0, len(data)):
             if isinstance(data[i], dict):
                 if str(BibWorkflowObjectIdContainer().__class__) in data[i]:
-                    data[i] = BibWorkflowObjectIdContainer().from_dict(data[i]).get_object()
+                    data[i] = BibWorkflowObjectIdContainer().from_dict(data[
+                        i]).get_object()
     else:
         raise WorkflowWorkerError("Data is not a list: %r" % (data,))
 
     return run_worker(workflow_name, data, **kwargs).uuid
 
 
-@celery.task(name='invenio.modules.workflows.workers.worker_celery.restart_worker')
+@celery.task(name='invenio_workflows.workers.worker_celery.restart_worker')
 @with_app_context()
 def celery_restart(wid, **kwargs):
     """Restart the workflow with Celery."""
@@ -55,7 +56,7 @@ def celery_restart(wid, **kwargs):
     return restart_worker(wid, **kwargs).uuid
 
 
-@celery.task(name='invenio.modules.workflows.workers.worker_celery.continue_worker')
+@celery.task(name='invenio_workflows.workers.worker_celery.continue_worker')
 @with_app_context()
 def celery_continue(oid, restart_point, **kwargs):
     """Restart the workflow with Celery."""
@@ -97,7 +98,8 @@ class worker_celery(object):
         :param restart_point: sets the start point
         :type restart_point: str
         """
-        return CeleryResult(celery_continue.delay(oid, restart_point, **kwargs))
+        return CeleryResult(celery_continue.delay(
+            oid, restart_point, **kwargs))
 
 
 class CeleryResult(AsynchronousResultWrapper):

@@ -59,6 +59,6 @@ class AsynchronousResultWrapper(object):
 
 def uuid_to_workflow(uuid):
     """Return the workflow associated to an uuid."""
-    from invenio.modules.workflows.models import Workflow
+    from invenio_workflows.models import Workflow
 
     return Workflow.query.filter(Workflow.uuid == uuid).first()

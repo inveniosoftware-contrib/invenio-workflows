@@ -31,7 +31,7 @@ class TestWorkflowModels(InvenioTestCase):
 
     def setUp(self):
         """Setup tests."""
-        from invenio.modules.workflows.models import BibWorkflowObject, \
+        from invenio_workflows.models import BibWorkflowObject, \
             Workflow
         from uuid import uuid1 as new_uuid
 
@@ -47,7 +47,7 @@ class TestWorkflowModels(InvenioTestCase):
 
     def test_deleting_workflow(self):
         """Test deleting workflow."""
-        from invenio.modules.workflows.models import BibWorkflowObject, \
+        from invenio_workflows.models import BibWorkflowObject, \
             Workflow
         bwo_id = self.bibworkflowobject.id
 
@@ -62,7 +62,7 @@ class TestWorkflowModels(InvenioTestCase):
 
     def test_deleting_bibworkflowobject(self):
         """Test deleting workflowobject."""
-        from invenio.modules.workflows.models import Workflow
+        from invenio_workflows.models import Workflow
         w_uuid = self.workflow.uuid
 
         # delete bibworkflowobject

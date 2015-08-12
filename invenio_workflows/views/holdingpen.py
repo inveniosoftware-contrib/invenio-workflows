@@ -222,7 +222,8 @@ def details(objectid):
                            workflow_definition=workflow_definition,
                            versions=ObjectVersion,
                            pretty_date=pretty_date,
-                           workflow_class=workflows.get(extracted_data['w_metadata'].name),
+                           workflow_class=workflows.get(
+                               extracted_data['w_metadata'].name),
                            )
 
 
@@ -248,7 +249,8 @@ def get_file_from_task_result(object_id=None, filename=None):
     task_results = bwobject.get_tasks_results()
     if filename in task_results and task_results[filename]:
         fileinfo = task_results[filename][0].get("result", dict())
-        directory, actual_filename = os.path.split(fileinfo.get("full_path", ""))
+        directory, actual_filename = os.path.split(
+            fileinfo.get("full_path", ""))
         return send_from_directory(directory, actual_filename)
 
 

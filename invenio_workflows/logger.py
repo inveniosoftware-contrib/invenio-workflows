@@ -36,7 +36,8 @@ def get_logger(logger_name, db_handler_obj, level=10, **kwargs):
 
     if not logger.handlers:
         # Create formatter and add it to the handlers
-        formatter = logging.Formatter('%(levelname)s %(asctime)s %(name)s    %(message)s')
+        formatter = logging.Formatter(
+            '%(levelname)s %(asctime)s %(name)s    %(message)s')
         db_handler_obj.setFormatter(formatter)
         db_handler_obj.setLevel(level)
         logger.addHandler(db_handler_obj)

@@ -492,7 +492,7 @@ BibWorkflowEngine
                     obj.set_extra_data(extra_data)
 
                     workflow_halted.send(obj)
-                    if type(e) == WorkflowHalt:
+                    if isinstance(e, WorkflowHalt):
                         reraise(*sys.exc_info())
                     else:
                         raise WorkflowHalt(e)

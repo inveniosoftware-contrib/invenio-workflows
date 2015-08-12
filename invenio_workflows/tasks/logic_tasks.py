@@ -22,7 +22,8 @@ from six import callable
 from functools import wraps
 
 
-def foreach(get_list_function=None, savename=None, cache_data=False, order="ASC"):
+def foreach(get_list_function=None, savename=None,
+            cache_data=False, order="ASC"):
     """Simple for each without memory of previous state.
 
     :param get_list_function: function returning the list on which we should
@@ -53,22 +54,27 @@ def foreach(get_list_function=None, savename=None, cache_data=False, order="ASC"
             eng.extra_data["_Iterators"][step] = {}
             if cache_data:
                 if callable(get_list_function):
-                    eng.extra_data["_Iterators"][step]["cache"] = get_list_function(obj, eng)
+                    eng.extra_data["_Iterators"][step][
+                        "cache"] = get_list_function(obj, eng)
                 elif isinstance(get_list_function, list):
-                    eng.extra_data["_Iterators"][step]["cache"] = get_list_function
+                    eng.extra_data["_Iterators"][step][
+                        "cache"] = get_list_function
                 else:
                     eng.extra_data["_Iterators"][step]["cache"] = []
 
-                my_list_to_process = eng.extra_data["_Iterators"][step]["cache"]
+                my_list_to_process = eng.extra_data[
+                    "_Iterators"][step]["cache"]
             if order == "ASC":
                 eng.extra_data["_Iterators"][step].update({"value": 0})
             elif order == "DSC":
-                eng.extra_data["_Iterators"][step].update({"value": len(my_list_to_process) - 1})
+                eng.extra_data["_Iterators"][step].update(
+                    {"value": len(my_list_to_process) - 1})
             eng.extra_data["_Iterators"][step]["previous_data"] = obj.data
 
         if callable(get_list_function):
             if cache_data:
-                my_list_to_process = eng.extra_data["_Iterators"][step]["cache"]
+                my_list_to_process = eng.extra_data[
+                    "_Iterators"][step]["cache"]
             else:
                 my_list_to_process = get_list_function(obj, eng)
         elif isinstance(get_list_function, list):
@@ -76,13 +82,16 @@ def foreach(get_list_function=None, savename=None, cache_data=False, order="ASC"
         else:
             my_list_to_process = []
 
-        if order == "ASC" and eng.extra_data["_Iterators"][step]["value"] < len(my_list_to_process):
-            obj.data = my_list_to_process[eng.extra_data["_Iterators"][step]["value"]]
+        if order == "ASC" and eng.extra_data["_Iterators"][
+                step]["value"] < len(my_list_to_process):
+            obj.data = my_list_to_process[
+                eng.extra_data["_Iterators"][step]["value"]]
             if savename is not None:
                 obj.extra_data[savename] = obj.data
             eng.extra_data["_Iterators"][step]["value"] += 1
         elif order == "DSC" and eng.extra_data["_Iterators"][step]["value"] > -1:
-            obj.data = my_list_to_process[eng.extra_data["_Iterators"][step]["value"]]
+            obj.data = my_list_to_process[
+                eng.extra_data["_Iterators"][step]["value"]]
             if savename is not None:
                 obj.extra_data[savename] = obj.data
             eng.extra_data["_Iterators"][step]["value"] -= 1
@@ -138,7 +147,8 @@ def simple_for(inita, enda, incrementa, variable_name=None):
             finish = True
         if not finish:
             if variable_name is not None:
-                eng.extra_data["_Iterators"][variable_name] = eng.extra_data["_Iterators"][step]["value"]
+                eng.extra_data["_Iterators"][variable_name] = eng.extra_data[
+                    "_Iterators"][step]["value"]
             eng.extra_data["_Iterators"][step]["value"] += increment
         else:
             del eng.extra_data["_Iterators"][step]

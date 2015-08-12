@@ -62,7 +62,7 @@ def convert_record_to_bibfield(model=None):
     """
     @wraps(convert_record_to_bibfield)
     def _convert_record_to_bibfield(obj, eng):
-        from invenio.modules.workflows.utils import convert_marcxml_to_bibfield
+        from invenio_workflows.utils import convert_marcxml_to_bibfield
         obj.data = convert_marcxml_to_bibfield(obj.data, model)
         eng.log.info("Field conversion succeeded")
     return _convert_record_to_bibfield
@@ -136,7 +136,7 @@ def convert_record(stylesheet="oaidc2marcxml.xsl"):
     """
     @wraps(convert_record)
     def _convert_record(obj, eng):
-        from invenio.modules.workflows.errors import WorkflowError
+        from invenio_workflows.errors import WorkflowError
         from invenio.legacy.bibconvert.xslt_engine import convert
 
         eng.log.info("Starting conversion using %s stylesheet" %
