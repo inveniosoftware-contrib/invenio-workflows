@@ -1,0 +1,154 @@
+# French translations for invenio-workflows.
+# Copyright (C) 2015 ORGANIZATION
+# This file is distributed under the same license as the invenio-workflows
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2015.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: invenio-workflows 0.1.0.dev20150000\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2015-08-12 17:17+0200\n"
+"PO-Revision-Date: 2015-08-12 17:17+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.0\n"
+
+#: invenio_workflows/actions/approval.py:28
+msgid "Approve"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/index.html:20
+#: invenio_workflows/views/holdingpen.py:107
+msgid "Your Pending Actions"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/index.html:25
+msgid ""
+"Here is a list of actions remaining to be resolved grouped by type of "
+"action"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/index.html:25
+msgid "work in progress"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/index.html:44
+msgid "Go to Holding Pen"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/actions/approval_main.html:23
+msgid "Close"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/actions/approval_main.html:25
+#, python-format
+msgid ""
+"Click on %(x_opening_tag)sAccept%(x_closing_tag)s to allow the record to "
+"continue."
+msgstr ""
+
+#: invenio_workflows/templates/workflows/actions/approval_mini.html:26
+#: invenio_workflows/templates/workflows/actions/approval_side.html:28
+msgid "Accept"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/actions/approval_mini.html:32
+#: invenio_workflows/templates/workflows/actions/approval_side.html:33
+msgid "Delete"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/settings/index_base.html:31
+msgid "Here will we show your current actions to do and filter settings"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/styles/harvesting_description.html:27
+msgid "Progress"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/styles/harvesting_description.html:32
+msgid "Succeeded"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/styles/harvesting_description.html:35
+msgid "Failed"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/styles/harvesting_description.html:39
+msgid "out of"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/styles/harvesting_description.html:40
+msgid "record(s) done"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/styles/harvesting_description.html:44
+msgid "failed"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/styles/harvesting_description.html:50
+msgid "No records harvested"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/styles/harvesting_description.html:55
+msgid "Records in this workflow"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/styles/harvesting_description.html:61
+msgid "Record deleted"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/styles/harvesting_description.html:74
+#: invenio_workflows/templates/workflows/styles/harvesting_record.html:29
+msgid "Identifiers"
+msgstr ""
+
+#: invenio_workflows/templates/workflows/styles/harvesting_record.html:45
+msgid "Categories"
+msgstr ""
+
+#: invenio_workflows/views/holdingpen.py:108
+msgid "Holdingpen"
+msgstr ""
+
+#: invenio_workflows/views/holdingpen.py:124
+msgid "Records"
+msgstr ""
+
+#: invenio_workflows/views/holdingpen.py:157
+msgid "Object Details"
+msgstr ""
+
+#: invenio_workflows/views/holdingpen.py:270
+msgid "Object restarted successfully."
+msgstr ""
+
+#: invenio_workflows/views/holdingpen.py:284
+msgid "Object continued with next task successfully."
+msgstr ""
+
+#: invenio_workflows/views/holdingpen.py:298
+msgid "Object restarted task successfully."
+msgstr ""
+
+#: invenio_workflows/views/holdingpen.py:312
+msgid "Object deleted successfully."
+msgstr ""
+
+#: invenio_workflows/views/holdingpen.py:329
+msgid "Objects deleted successfully."
+msgstr ""
+
+#: invenio_workflows/views/settings.py:53
+#, python-format
+msgid "%(icon)s Your actions"
+msgstr ""
+
+#: invenio_workflows/views/settings.py:58
+msgid "Your actions"
+msgstr ""
+
