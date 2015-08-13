@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+#
 # This file is part of Invenio.
-# Copyright (C) 2014 CERN.
+# Copyright (C) 2012, 2013, 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -18,22 +19,15 @@
 
 """ Implements a workflow for testing."""
 
-from invenio_workflows.tasks.workflows_tasks import (start_async_workflow, workflows_reviews,
-                                                     wait_for_workflows_to_complete)
+from invenio_workflows.tasks.sample_tasks import (
+    add_data, halt_if_data_less_than, reduce_data_by_one
+)
 
-from invenio_workflows.tasks.logic_tasks import simple_for, end_for
 
+class demo_workflow(object):
 
-class test_workflow_workflows_errors_B(object):
+    """A test workflow for the testsuite."""
 
-    """Test workflow for unit-tests."""
-
-    workflow = [
-        simple_for(0, 5, 1, "X"),
-        [
-            start_async_workflow("test_workflow_error"),
-        ],
-        end_for,
-        wait_for_workflows_to_complete,
-        workflows_reviews(True, False)
-    ]
+    workflow = [halt_if_data_less_than(20),
+                add_data(20),
+                reduce_data_by_one(2)]

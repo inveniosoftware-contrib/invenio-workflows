@@ -33,7 +33,7 @@ from invenio_workflows.tasks.logic_tasks import simple_for, end_for, workflow_if
 from invenio_workflows.tasks.marcxml_tasks import set_obj_extra_data_key
 
 
-class test_workflow_workflows(object):
+class demo_workflow_workflows(object):
 
     """Test workflow for unit-tests."""
 
@@ -41,7 +41,7 @@ class test_workflow_workflows(object):
         log_info("starting"),
         simple_for(0, 20, 1, "X"),
         [
-            start_async_workflow("test_workflow"),
+            start_async_workflow("demo_workflow"),
         ],
         end_for,
 
@@ -56,12 +56,12 @@ class test_workflow_workflows(object):
         [
             workflow_if(num_workflow_running_greater(3), neg=True),
             [
-                start_async_workflow("test_workflow"),
+                start_async_workflow("demo_workflow"),
             ],
             workflow_else,
             [
                 wait_for_a_workflow_to_complete(0.1),
-                start_async_workflow("test_workflow"),
+                start_async_workflow("demo_workflow"),
             ],
             set_obj_extra_data_key("nbworkflowrunning",
                                    get_nb_workflow_running),

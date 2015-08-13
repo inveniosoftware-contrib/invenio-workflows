@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-#
 # This file is part of Invenio.
-# Copyright (C) 2014, 2015 CERN.
+# Copyright (C) 2014 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -17,15 +16,17 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""Implement a workflow for testing."""
+""" Implements a workflow for testing."""
 
-from invenio_workflows.tasks.sample_tasks import task_b, add_data, generate_error
+from invenio_workflows.tasks.sample_tasks import task_reduce_and_halt, sleep_task
 
 
-class test_workflow_error(object):
+class demo_workflow_hardcore(object):
 
     """Test workflow for unit-tests."""
 
     workflow = [
-        task_b, task_b, add_data(15), generate_error
+        sleep_task(0.001),
+        task_reduce_and_halt,
+        sleep_task(1)
     ]

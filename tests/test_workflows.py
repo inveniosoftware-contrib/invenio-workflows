@@ -190,7 +190,7 @@ distances from it.
         self.assertEqual(None, test_object.id_parent)
         self.assertEqual(20, test_object.get_data())
 
-        engine = start('test_workflow', [test_object],
+        engine = start('demo_workflow', [test_object],
                        module_name="unit_tests")
 
         self.assertEqual(38, test_object.get_data())
@@ -217,7 +217,7 @@ distances from it.
         self.assertEqual(None, test_object.id_parent)
         self.assertEqual(2, test_object.get_data())
 
-        engine = start('test_workflow', [test_object],
+        engine = start('demo_workflow', [test_object],
                        module_name="unit_tests")
 
         self.assertEqual(2, test_object.get_data())
@@ -230,7 +230,7 @@ distances from it.
         from invenio_workflows.engine import BibWorkflowEngine
         from uuid import uuid1 as new_uuid
 
-        test_workflow = Workflow(name='test_workflow', uuid=new_uuid(),
+        test_workflow = Workflow(name='demo_workflow', uuid=new_uuid(),
                                  id_user=0, module_name="Unknown", )
         test_workflow_engine = BibWorkflowEngine(name=test_workflow.name,
                                                  uuid=test_workflow.uuid)
@@ -251,7 +251,7 @@ distances from it.
         test_object.set_data(tries)
         test_object.save()
 
-        engine = start('test_workflow_hardcore', [test_object],
+        engine = start('demo_workflow_hardcore', [test_object],
                        module_name="unit_tests")
         for i in range(0, tries):
             self.assertEqual(engine.status, WorkflowStatus.HALTED)
@@ -274,7 +274,7 @@ distances from it.
         test_object.set_data(initial_data)
         test_object.save()
 
-        workflow = start(workflow_name="test_workflow",
+        workflow = start(workflow_name="demo_workflow",
                          data=[test_object],
                          module_name="unit_tests")
 
@@ -302,7 +302,7 @@ distances from it.
         initial_data = 22
         final_data = 40
 
-        workflow = start(workflow_name="test_workflow",
+        workflow = start(workflow_name="demo_workflow",
                          data=[initial_data],
                          module_name="unit_tests")
 
@@ -334,7 +334,7 @@ distances from it.
         self.test_data = [1, 20]
         final_data = [1, 38]
 
-        workflow = start(workflow_name="test_workflow",
+        workflow = start(workflow_name="demo_workflow",
                          data=self.test_data,
                          module_name="unit_tests")
 
@@ -430,7 +430,7 @@ distances from it.
         current.set_data(20)
         current.save()
 
-        workflow = start(workflow_name="test_workflow",
+        workflow = start(workflow_name="demo_workflow",
                          data=[current],
                          module_name="unit_tests")
 
@@ -440,7 +440,7 @@ distances from it.
 
         previous = BibWorkflowObject.query.get(current.id)
 
-        workflow_2 = start(workflow_name="test_workflow",
+        workflow_2 = start(workflow_name="demo_workflow",
                            data=[previous],
                            module_name="unit_tests")
 
@@ -497,7 +497,7 @@ distances from it.
 
         try:
             start_by_oids(
-                'test_workflow', [
+                'demo_workflow', [
                     obj_running.id], module_name="unit_tests")
         except Exception as e:
             self.assertTrue(isinstance(e, WorkflowObjectVersionError))
@@ -508,7 +508,7 @@ distances from it.
         obj_running.save(version=ObjectVersion.RUNNING)
         try:
             start_by_oids(
-                'test_workflow', [
+                'demo_workflow', [
                     obj_running.id], module_name="unit_tests")
         except Exception as e:
             self.assertTrue(isinstance(e, WorkflowObjectVersionError))
@@ -519,7 +519,7 @@ distances from it.
         obj_running.set_data(1234)
         obj_running.save(version=5)
         try:
-            start_by_oids('test_workflow', [obj_running.id],
+            start_by_oids('demo_workflow', [obj_running.id],
                           module_name="unit_tests")
         except Exception as e:
             self.assertTrue(isinstance(e, WorkflowObjectVersionError))
@@ -535,7 +535,7 @@ distances from it.
         initial_data = 1
 
         # testing restarting from previous task
-        init_workflow = start("test_workflow",
+        init_workflow = start("demo_workflow",
                               data=[initial_data],
                               module_name="unit_tests")
 
@@ -575,7 +575,7 @@ distances from it.
 
         initial_data = 1
 
-        init_workflow = start(workflow_name="test_workflow",
+        init_workflow = start(workflow_name="demo_workflow",
                               data=[initial_data],
                               module_name="unit_tests")
 
@@ -616,13 +616,13 @@ distances from it.
         self.assertRaises(
             WorkflowError,
             start,
-            workflow_name="test_workflow_error",
+            workflow_name="demo_workflow_error",
             data=[initial_data],
             module_name="unit_tests"
         )
         self.assertEqual(initial_data.version, ObjectVersion.ERROR)
 
-        restarted_workflow = start_by_oids("test_workflow",
+        restarted_workflow = start_by_oids("demo_workflow",
                                            oids=[initial_data.id],
                                            module_name="unit_tests")
         self.assertEqual(initial_data.version, ObjectVersion.WAITING)
@@ -674,7 +674,7 @@ class TestWorkflowTasks(WorkflowTasksTestCase):
         test_object.save()
 
         # Initial run
-        workflow = start('test_workflow_logic', [test_object],
+        workflow = start('demo_workflow_logic', [test_object],
                          module_name="unit_tests")
 
         self.assertEqual(5, test_object.get_data())
@@ -698,7 +698,7 @@ class TestWorkflowTasks(WorkflowTasksTestCase):
         test_object = BibWorkflowObject()
         test_object.set_data(0)
         test_object.save()
-        workflow = start('test_workflow_logic', [test_object],
+        workflow = start('demo_workflow_logic', [test_object],
                          module_name="unit_tests")
 
         self.assertEqual(5, test_object.get_data())
@@ -730,7 +730,7 @@ class TestWorkflowTasks(WorkflowTasksTestCase):
         test_object.save()
 
         workflow = start(
-            'test_workflow_logic',
+            'demo_workflow_logic',
             [test_object],
             module_name="unit_tests")
 

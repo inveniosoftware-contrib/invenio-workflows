@@ -19,27 +19,21 @@
 """ Implements a workflow for testing."""
 
 from invenio_workflows.tasks.workflows_tasks import (start_async_workflow, workflows_reviews,
-                                                     wait_for_a_workflow_to_complete)
+                                                     wait_for_workflows_to_complete)
 
 from invenio_workflows.tasks.logic_tasks import simple_for, end_for
 
 
-class test_workflow_workflows_errors(object):
+class demo_workflow_workflows_errors_B(object):
 
     """Test workflow for unit-tests."""
 
     workflow = [
         simple_for(0, 5, 1, "X"),
         [
-            start_async_workflow("test_workflow_error"),
+            start_async_workflow("demo_workflow_error"),
         ],
         end_for,
-
-        simple_for(0, 5, 1),
-        [
-            wait_for_a_workflow_to_complete(0.1),
-        ],
-        end_for,
-
-        workflows_reviews(False, False)
+        wait_for_workflows_to_complete,
+        workflows_reviews(True, False)
     ]

@@ -27,7 +27,7 @@ from invenio_workflows.tasks.workflows_tasks import interrupt_workflow
 from invenio_workflows.tasks.marcxml_tasks import get_data, set_obj_extra_data_key
 
 
-class test_workflow_logic(object):
+class demo_workflow_logic(object):
 
     """Test workflow for unit-tests."""
 

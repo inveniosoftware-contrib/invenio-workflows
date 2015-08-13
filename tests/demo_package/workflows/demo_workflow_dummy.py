@@ -22,7 +22,7 @@
 from invenio_workflows.tasks.sample_tasks import halt_whatever
 
 
-class test_workflow_dummy(object):
+class demo_workflow_dummy(object):
 
     """A test workflow for the testsuite."""
 

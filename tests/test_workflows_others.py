@@ -79,7 +79,7 @@ class WorkflowOthers(WorkflowTasksTestCase):
         from invenio_workflows.api import start
 
         try:
-            start("test_workflow_error", [2],
+            start("demo_workflow_error", [2],
                   module_name="unit_tests")
         except Exception as e:
             self.assertTrue(isinstance(e, WorkflowError))

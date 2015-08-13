@@ -24,14 +24,14 @@ from invenio_workflows.tasks.workflows_tasks import (start_async_workflow, workf
 from invenio_workflows.tasks.logic_tasks import simple_for, end_for
 
 
-class test_workflow_workflows_errors_C(object):
+class demo_workflow_workflows_errors_C(object):
 
     """Test workflow for unit-tests."""
 
     workflow = [
         simple_for(0, 5, 1, "X"),
         [
-            start_async_workflow("test_workflow_workflows_errors_B"),
+            start_async_workflow("demo_workflow_workflows_errors_B"),
         ],
         end_for,
         wait_for_workflows_to_complete,

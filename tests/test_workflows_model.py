@@ -35,7 +35,7 @@ class TestWorkflowModels(InvenioTestCase):
             Workflow
         from uuid import uuid1 as new_uuid
 
-        self.workflow = Workflow(name='test_workflow', uuid=new_uuid(),
+        self.workflow = Workflow(name='demo_workflow', uuid=new_uuid(),
                                  id_user=0, module_name="Unknown")
         self.bibworkflowobject = BibWorkflowObject(workflow=self.workflow)
 

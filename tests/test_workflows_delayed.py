@@ -56,7 +56,7 @@ class WorkflowDelayedTest(WorkflowTasksTestCase):
         test_objectb.save()
         from invenio_workflows.worker_result import uuid_to_workflow
 
-        asyncr = start_delayed('test_workflow', [test_objectb],
+        asyncr = start_delayed('demo_workflow', [test_objectb],
                                module_name="unit_tests")
         engineb = asyncr.get(uuid_to_workflow)
 
@@ -68,7 +68,7 @@ class WorkflowDelayedTest(WorkflowTasksTestCase):
         test_objecte = BibWorkflowObject()
         test_objecte.set_data(2)
         test_objecte.save()
-        asyncr = start_delayed('test_workflow', [test_objecte],
+        asyncr = start_delayed('demo_workflow', [test_objecte],
                                module_name="unit_tests")
         engineb = asyncr.get(uuid_to_workflow)
         asyncr = continue_oid_delayed(test_objecte.id)
@@ -86,7 +86,7 @@ class WorkflowDelayedTest(WorkflowTasksTestCase):
         test_object = BibWorkflowObject()
         test_object.set_data(22)
         test_object.save()
-        async = start_delayed("test_workflow_workflows", [test_object],
+        async = start_delayed("demo_workflow_workflows", [test_object],
                               module_name="unit_tests")
         engine = async.get(uuid_to_workflow)
         from invenio_workflows.engine import WorkflowStatus
@@ -109,7 +109,7 @@ class WorkflowDelayedTest(WorkflowTasksTestCase):
         test_objectb.set_data(22)
         test_objectb.save()
         data = BibWorkflowObjectIdContainer(test_objectb).to_dict()
-        celery_run('test_workflow', [data], module_name="unit_tests")
+        celery_run('demo_workflow', [data], module_name="unit_tests")
         self.assertEqual(40, test_objectb.get_data())
         test_object = BibWorkflowObject()
         test_object.set_data(22)
@@ -121,7 +121,7 @@ class WorkflowDelayedTest(WorkflowTasksTestCase):
         for i in range(0, len(data)):
             if isinstance(data[i], BibWorkflowObject):
                 data[i] = BibWorkflowObjectIdContainer(data[i]).to_dict()
-        celery_run('test_workflow', data, module_name="unit_tests")
+        celery_run('demo_workflow', data, module_name="unit_tests")
         self.assertEqual(40, test_object.get_data())
         self.assertEqual(40, test_objectc.get_data())
 
@@ -131,7 +131,7 @@ class WorkflowDelayedTest(WorkflowTasksTestCase):
         from invenio_workflows.worker_result import uuid_to_workflow
 
         engine = uuid_to_workflow(
-            celery_run('test_workflow_logic', [test_object],
+            celery_run('demo_workflow_logic', [test_object],
                        module_name="unit_tests"))
         self.assertEqual(5, test_object.get_data())
         self.assertEqual("lt9", test_object.get_extra_data()["test"])
@@ -167,7 +167,7 @@ class WorkflowDelayedTest(WorkflowTasksTestCase):
         test_object = BibWorkflowObject()
         test_object.save()
         test_object.set_data(22)
-        engine = start("test_workflow_workflows", [test_object],
+        engine = start("demo_workflow_workflows", [test_object],
                        module_name="unit_tests")
         from invenio_workflows.engine import WorkflowStatus
 
