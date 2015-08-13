@@ -123,12 +123,8 @@ def index():
     Acts as a hub for catalogers (may be removed)
     """
     # TODO: Add user filtering
-    error_state = get_holdingpen_objects(
-        [ObjectVersion.name_from_version(ObjectVersion.ERROR)]
-    )
-    halted_state = get_holdingpen_objects(
-        [ObjectVersion.name_from_version(ObjectVersion.HALTED)]
-    )
+    error_state = get_holdingpen_objects([ObjectStatus.labels[ObjectStatus.ERROR.value]])
+    halted_state = get_holdingpen_objects([ObjectStatus.labels[ObjectStatus.HALTED.value]])
     return dict(error_state=error_state,
                 halted_state=halted_state)
 
@@ -329,7 +325,7 @@ def get_file_from_task_result(object_id=None, filename=None):
 @permission_required(viewholdingpen.name)
 def get_file_from_object(object_id=None, filename=None):
     """Send the requested file to user from a workflow object FFT value."""
-    bwobject = BibWorkflowObject.query.get_or_404(object_id)
+    bwobject = DbWorkflowObject.query.get_or_404(object_id)
     data = bwobject.get_data()
     urls = data.get("fft.url", [])
     for url in urls:

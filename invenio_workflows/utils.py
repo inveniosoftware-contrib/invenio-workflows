@@ -18,6 +18,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 """Various utility functions for use across the workflows module."""
+
 from functools import wraps
 
 from flask import current_app, jsonify, render_template
@@ -32,8 +33,8 @@ from invenio.ext.cache import cache
 
 from flask import current_app, jsonify, render_template
 
-DbWorkflowObject = lazy_import("invenio.modules.workflows.models.DbWorkflowObject")
-Workflow = lazy_import("invenio.modules.workflows.models.Workflow")
+DbWorkflowObject = lazy_import("invenio_workflows.models.DbWorkflowObject")
+Workflow = lazy_import("invenio_workflows.models.Workflow")
 
 
 from invenio_ext.cache import cache
@@ -70,7 +71,7 @@ class BibWorkflowObjectIdContainer(object):
 
     def get_object(self):
         """Get the DbWorkflowObject from self.id."""
-        from invenio.modules.workflows.models import DbWorkflowObject
+        from invenio_workflows.models import DbWorkflowObject
 
         if self.id is not None:
             return DbWorkflowObject.query.filter(
@@ -374,7 +375,7 @@ def extract_data(bwobject):
     Used for rendering the Record's holdingpen table row and
     details and action page.
     """
-    from invenio.modules.workflows.models import Workflow
+    from invenio_workflows.models import Workflow
     extracted_data = {}
     if bwobject.id_parent is not None:
         extracted_data['bwparent'] = \
@@ -408,13 +409,13 @@ def extract_data(bwobject):
 
 
 def get_data_types():
-    """Return a list of distinct data types from BibWorkflowObject."""
-    from .models import BibWorkflowObject
+    """Return a list of distinct data types from DbWorkflowObject."""
+    from .models import DbWorkflowObject
     return [
-        t[0] for t in BibWorkflowObject.query.with_entities(
-            BibWorkflowObject.data_type
+        t[0] for t in DbWorkflowObject.query.with_entities(
+            DbWorkflowObject.data_type
         ).distinct(
-            BibWorkflowObject.data_type
+            DbWorkflowObject.data_type
         )
     ]
 
@@ -447,7 +448,7 @@ def get_action_list(object_list):
 
 
 def get_rendered_task_results(obj):
-    """Return a list of rendered results from BibWorkflowObject task results."""
+    """Return a list of rendered results from DbWorkflowObject task results."""
     results = {}
     for name, res in obj.get_tasks_results().items():
         for result in res:

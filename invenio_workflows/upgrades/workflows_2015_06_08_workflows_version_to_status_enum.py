@@ -17,12 +17,10 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-import warnings
-
 from invenio.ext.sqlalchemy import db
 from invenio_upgrader.api import op
 
-from invenio.modules.workflows.models import (
+from invenio_workflows.models import (
     CallbackPosType,
     ChoiceType,
     ObjectStatus,

@@ -23,13 +23,11 @@ If you want to run a workflow using the workflows module,
 this is the high level API you will want to use.
 """
 
-from werkzeug.utils import import_string, cached_property, ImportStringError
+from werkzeug.utils import import_string, cached_property
 
 from invenio.base.globals import cfg
-from .utils import BibWorkflowObjectIdContainer
-from invenio.modules.workflows.models import DbWorkflowObject
-from invenio.modules.workflows.errors import WorkflowWorkerError
 
+from .models import DbWorkflowObject
 from .utils import BibWorkflowObjectIdContainer
 
 
@@ -177,11 +175,11 @@ def start_by_wid_delayed(wid, **kwargs):
 
 
 def start_by_oids(workflow_name, oids, **kwargs):
-    """Start workflow by name with :py:class:`invenio.modules.workflows.models.DbWorkflowObject`
+    """Start workflow by name with :py:class:`invenio_workflows.models.DbWorkflowObject`
     ids.
 
     Wrapper to call :py:func:`.start` with list of
-    :py:class:`invenio.modules.workflows.models.DbWorkflowObject` ids.
+    :py:class:`invenio_workflows.models.DbWorkflowObject` ids.
 
     Special custom keyword arguments can be given to the workflow engine
     in order to pass certain variables to the tasks in the workflow execution,
@@ -209,7 +207,7 @@ def start_by_oids(workflow_name, oids, **kwargs):
 
 def start_by_oids_delayed(workflow_name, oids, **kwargs):
     """Start asynchronously workflow by name with
-    :py:class:`invenio.modules.workflows.models.DbWorkflowObject` ids.
+    :py:class:`invenio_workflows.models.DbWorkflowObject` ids.
 
     Similar behavior as :py:func:`.start_by_oids`, except it calls
     :py:func:`.start_delayed`.

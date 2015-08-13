@@ -18,10 +18,11 @@
 
 """Mediator between API and workers responsible for running the workflows."""
 
-from invenio.modules.workflows.client import run_workflow, continue_execution
-from .engine import BibWorkflowEngine
-from invenio.modules.workflows.models import DbWorkflowObject, Workflow
 from workflow.errors import WorkflowObjectStatusError
+
+from .client import run_workflow, continue_execution
+from .engine import BibWorkflowEngine
+from .models import DbWorkflowObject, Workflow
 
 
 def run_worker(wname, data, **kwargs):

@@ -18,16 +18,19 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 """The workflow engine extension of GenericWorkflowEngine."""
+
 from __future__ import absolute_import
 
 from copy import deepcopy
 from uuid import uuid1 as new_uuid
 
+from invenio.ext.sqlalchemy import db
+
 from workflow.engine import (
     ActionMapper,
-    TransitionActions,
-    Continue,
     Break,
+    Continue,
+    TransitionActions,
 )
 from workflow.engine_db import (
     DbProcessingFactory,
@@ -36,21 +39,18 @@ from workflow.engine_db import (
     WorkflowStatus,
 )
 from workflow.errors import WorkflowDefinitionError
-from .logger import DbWorkflowLogHandler, get_logger
+from workflow.utils import staticproperty
 
 from .errors import WaitProcessing
-
-from invenio.modules.workflows.models import (
-    get_default_extra_data,
-    Workflow,
+from .logger import DbWorkflowLogHandler, get_logger
+from .models import (
     DbWorkflowObject,
     DbWorkflowEngineLog,
+    ObjectStatus,
+    Workflow,
+    get_default_extra_data,
 )
-
-from .utils import dictproperty, get_task_history
-from workflow.utils import staticproperty
-from invenio.ext.sqlalchemy import db
-from .models import ObjectStatus
+from .utils import get_task_history
 
 
 class BibWorkflowEngine(DbWorkflowEngine):
@@ -96,7 +96,7 @@ class BibWorkflowEngine(DbWorkflowEngine):
 
     @classmethod
     def with_name(cls, name, id_user=0, module_name="Unknown", **extra_data):
-        """ Instantiate a DbWorkflowEngine given a name or UUID.
+        """Instantiate a DbWorkflowEngine given a name or UUID.
 
         :param name: name of workflow to run.
         :type name: str
@@ -118,14 +118,16 @@ class BibWorkflowEngine(DbWorkflowEngine):
 
     @classmethod
     def from_uuid(cls, uuid, **extra_data):
-        """ Load a workflow from the database given a UUID.
+        """Load a workflow from the database given a UUID.
 
         :param uuid: pass a uuid to an existing workflow.
         :type uuid: str
         """
         db_obj = Workflow.get(Workflow.uuid == uuid).first()
         if db_obj is None:
-            raise LookupError("No workflow with UUID {} was found".format(uuid))
+            raise LookupError(
+                "No workflow with UUID {} was found".format(uuid)
+            )
         return cls(db_obj, **extra_data)
 
     @property
@@ -264,7 +266,6 @@ BibWorkflowEngine
 
     def reset_extra_data(self):
         """Reset extra data to defaults."""
-        from .models import get_default_extra_data
         self.db_obj.extra_data = get_default_extra_data()
 
     # Deprecated
@@ -320,6 +321,7 @@ class InvActionMapper(ActionMapper):
         else:
             obj.extra_data["_task_history"].append(task_history)
 
+
 class InvProcessingFactory(DbProcessingFactory):
 
     @staticproperty
@@ -336,7 +338,9 @@ class InvProcessingFactory(DbProcessingFactory):
     def before_object(eng, objects, obj):
         """Action to take before the proccessing of an object begins."""
         obj.reset_error_message()
-        super(InvProcessingFactory, InvProcessingFactory).before_object(eng, objects, obj)
+        super(InvProcessingFactory, InvProcessingFactory).before_object(
+            eng, objects, obj
+        )
 
 
 class InvTransitionAction(DbTransitionAction):
@@ -351,7 +355,8 @@ class InvTransitionAction(DbTransitionAction):
         """
         e = exc_info[1]
         obj.set_action(e.action, e.message)
-        obj.save(status=eng.object_status.WAITING, callback_pos=eng.state.callback_pos,
+        obj.save(status=eng.object_status.WAITING,
+                 callback_pos=eng.state.callback_pos,
                  id_workflow=eng.uuid)
         eng.save(WorkflowStatus.HALTED)
         eng.log.warning("Workflow '%s' halted at task %s with message: %s",
@@ -363,12 +368,15 @@ class InvTransitionAction(DbTransitionAction):
         e = exc_info[1]
         if e.action:
             obj.set_action(e.action, e.message)
-            obj.save(status=eng.object_status.HALTED, callback_pos=eng.state.callback_pos,
+            obj.save(status=eng.object_status.HALTED,
+                     callback_pos=eng.state.callback_pos,
                      id_workflow=eng.uuid)
             eng.save(WorkflowStatus.HALTED)
             TransitionActions.HaltProcessing(obj, eng, callbacks, exc_info)
-            eng.log.warning("Workflow '%s' waiting at task %s with message: %s",
-                            eng.name, eng.current_taskname or "Unknown", e.message)
+            eng.log.warning(
+                "Workflow '%s' waiting at task %s with message: %s",
+                eng.name, eng.current_taskname or "Unknown", e.message
+            )
         else:
             from invenio.utils.deprecation import RemovedInInvenio23Warning
             import warnings

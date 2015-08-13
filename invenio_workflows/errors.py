@@ -19,10 +19,15 @@
 
 from workflow.errors import with_str, HaltProcessing
 
+
 @with_str(('message', ('action', 'payload')))
 class WaitProcessing(HaltProcessing):  # Used to be WorkflowHalt
     def __init__(self, message="", action=None, payload=None):
-        super(WaitProcessing, self).__init__(message=message, action=action, payload=payload)
+        super(WaitProcessing, self).__init__(
+            message=message,
+            action=action,
+            payload=payload
+        )
 
 
 @with_str(('message', ('worker_name', 'payload')))

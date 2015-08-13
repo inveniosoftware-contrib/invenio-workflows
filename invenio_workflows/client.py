@@ -37,7 +37,6 @@ def run_workflow(wfe, data, stop_on_halt=False, stop_on_error=True,
                 initial_run=initial_run)
 
 
-
 def continue_execution(wfe, workflow_object, restart_point="restart_task",
                        stop_on_halt=False):
     """

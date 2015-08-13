@@ -33,15 +33,13 @@ from functools import partial
 from workflow.engine_db import WorkflowStatus
 from workflow.errors import WorkflowError, WorkflowObjectStatusError
 
-from invenio_workflows.api import start, continue_oid
-
 from invenio.testsuite import InvenioTestCase, make_test_suite, run_test_suite
 from invenio.base.wrappers import lazy_import
 
-ObjectStatus = lazy_import("invenio.modules.workflows.models.ObjectStatus")
-DbWorkflowObject = lazy_import("invenio.modules.workflows.models.DbWorkflowObject")
-Workflow = lazy_import("invenio.modules.workflows.models.Workflow")
-DbWorkflowObjectLog = lazy_import("invenio.modules.workflows.models.DbWorkflowObjectLog")
+ObjectStatus = lazy_import("invenio_workflows.models.ObjectStatus")
+DbWorkflowObject = lazy_import("invenio_workflows.models.DbWorkflowObject")
+Workflow = lazy_import("invenio_workflows.models.Workflow")
+DbWorkflowObjectLog = lazy_import("invenio_workflows.models.DbWorkflowObjectLog")
 
 
 TEST_PACKAGES = [
@@ -49,8 +47,10 @@ TEST_PACKAGES = [
     'demo_package',
 ]
 
-start = lazy_import("invenio.modules.workflows.api.start")
+start = lazy_import("invenio_workflows.api.start")
 start = partial(start, module_name='unit_tests')
+
+continue_oid = lazy_import("invenio_workflows.api.continue_oid")
 
 
 class WorkflowTasksTestCase(InvenioTestCase):
@@ -442,7 +442,7 @@ distances from it.
 
     def test_workflow_for_running_object(self):
         """Test workflow with running object given and watch it fail."""
-        from invenio.modules.workflows.api import start_by_oids
+        from invenio_workflows.api import start_by_oids
 
         obj_running = DbWorkflowObject()
         obj_running.set_data(1234)
@@ -509,7 +509,7 @@ distances from it.
 
     def test_restart_workflow(self):
         """Test restarting workflow for given workflow id."""
-        from invenio.modules.workflows.api import start_by_wid
+        from invenio_workflows.api import start_by_wid
 
         initial_data = 1
 
@@ -539,7 +539,7 @@ distances from it.
 
     def test_restart_failed_workflow(self):
         """Test restarting workflow for given workflow id."""
-        from invenio.modules.workflows.api import start_by_oids
+        from invenio_workflows.api import start_by_oids
 
         initial_data = DbWorkflowObject.create_object()
         initial_data.set_data(1)
@@ -587,7 +587,7 @@ class TestWorkflowTasks(WorkflowTasksTestCase):
 
     def test_logic_tasks_restart(self):
         """Test that the logic tasks work correctly when restarted."""
-        from invenio.modules.workflows.api import start_by_wid
+        from invenio_workflows.api import start_by_wid
 
         test_object = DbWorkflowObject()
         test_object.set_data(0)
@@ -635,7 +635,7 @@ class TestWorkflowTasks(WorkflowTasksTestCase):
 
     def test_workflow_without_workflow_object_saved(self):
         """Test that the logic tasks work correctly."""
-        from invenio.modules.workflows.api import start_by_wid
+        from invenio_workflows.api import start_by_wid
 
         test_object = DbWorkflowObject()
         test_object.set_data(0)

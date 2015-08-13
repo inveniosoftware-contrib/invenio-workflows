@@ -30,8 +30,8 @@ from collections import Iterable, namedtuple
 from datetime import datetime
 from six import iteritems, callable
 from six.moves import cPickle
+
 from sqlalchemy import desc
-from sqlalchemy.exc import DontWrapMixin
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_utils.types.choice import (
     ChoiceType as BadChoiceType,
@@ -39,11 +39,7 @@ from sqlalchemy_utils.types.choice import (
     Enum,
     EnumTypeImpl,
 )
-from invenio.modules.workflows.logger import get_logger, DbWorkflowLogHandler
-from workflow.engine_db import WorkflowStatus, EnumLabel
-from workflow.utils import staticproperty
 
-from .utils import get_func_info, get_workflow_definition
 from invenio.base.globals import cfg
 from invenio.base.helpers import unicodifier
 
@@ -51,6 +47,12 @@ from invenio.ext.sqlalchemy import db
 from invenio.ext.sqlalchemy.utils import session_manager
 
 from invenio.utils.deprecation import deprecated, RemovedInInvenio23Warning
+
+from workflow.engine_db import WorkflowStatus, EnumLabel
+from workflow.utils import staticproperty
+
+from .logger import get_logger, DbWorkflowLogHandler
+from .utils import get_func_info, get_workflow_definition
 
 
 class ObjectStatus(EnumLabel):
@@ -276,25 +278,6 @@ class Workflow(db.Model):
                "id_user: %s, status: %s)>" % \
                (str(self.name), str(self.module_name), str(self.created),
                 str(self.modified), str(self.id_user), str(self.status))
-
-    def __str__(self):
-        """Print a workflow object."""
-        return """Workflow:
-
-        Uuid: %s
-        Name: %s
-        User id: %s
-        Module name: %s
-        Created: %s
-        Modified: %s
-        Status: %s
-        Counters: initial=%s, halted=%s, error=%s, finished=%s
-        Extra data: %s""" % (str(self.uuid), str(self.name), str(self.id_user),
-                             str(self.module_name), str(self.created),
-                             str(self.modified), str(self.status),
-                             str(self.counter_initial), str(self.counter_halted),
-                             str(self.counter_error), str(self.counter_finished),
-                             str(self._extra_data))
 
     @classmethod
     def get(cls, *criteria, **filters):
@@ -819,9 +802,9 @@ class DbWorkflowObject(db.Model):
         """
         # FIXME: Move from invenio
         if delayed:
-            from invenio.modules.workflows.api import start_delayed as start_func
+            from .api import start_delayed as start_func
         else:
-            from invenio.modules.workflows.api import start as start_func
+            from .api import start as start_func
         self.save()
         return start_func(workflow_name, data=[self], **kwargs)
 
