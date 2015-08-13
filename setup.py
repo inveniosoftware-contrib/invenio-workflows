@@ -40,9 +40,11 @@ requirements = [
 ]
 
 test_requirements = [
+    'unittest2>=1.1.0',
+    'Flask_Testing>=0.4.1',
     'pytest>=2.7.0',
-    'pytest-cov>=1.8.0',
-    'pytest-pep8>=1.0.6',
+    'pytest_cov>=1.8.0,<2.0.0',
+    'pytest_pep8>=1.0.6',
     'coverage>=3.7.1',
 ]
 
