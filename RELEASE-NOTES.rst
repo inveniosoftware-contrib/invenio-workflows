@@ -2,7 +2,7 @@
  Invenio-Workflows v0.1.0
 ==========================
 
-Invenio-Workflows v0.1.0 was released on TBD, 2015.
+Invenio-Workflows v0.1.0 was released on August 13, 2015.
 
 About
 -----
