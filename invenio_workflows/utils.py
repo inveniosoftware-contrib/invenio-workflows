@@ -19,17 +19,20 @@
 
 """Various utility functions for use across the workflows module."""
 
-import msgpack
-
 from functools import wraps
-from flask import current_app, jsonify, render_template
-from operator import attrgetter
-from six import text_type
 
-from sqlalchemy import or_
+from operator import attrgetter
+
+from flask import current_app, jsonify, render_template
 
 from invenio.base.helpers import unicodifier
 from invenio.ext.cache import cache
+
+import msgpack
+
+from six import text_type
+
+from sqlalchemy import or_
 
 from .registry import actions, workflows
 
@@ -308,11 +311,13 @@ def get_formatted_holdingpen_object(bwo, date_format='%Y-%m-%d %H:%M:%S.%f'):
             return results
     results = generate_formatted_holdingpen_object(bwo)
     if results:
-        cache.set("workflows_holdingpen_{0}".format(bwo.id),
-                  msgpack.dumps(results),
-                  timeout=current_app.config.get(
-                      "WORKFLOWS_HOLDING_PEN_CACHE_TIMEOUT"
-                  ))
+        cache.set(
+            "workflows_holdingpen_{0}".format(bwo.id),
+            msgpack.dumps(results),
+            timeout=current_app.config.get(
+                "WORKFLOWS_HOLDING_PEN_CACHE_TIMEOUT"
+            )
+        )
     return results
 
 
@@ -559,7 +564,8 @@ def get_func_info(func):
     if closure:
         for index, arg in enumerate(closure):
             if not callable(arg.cell_contents):
-                parameters.append((varnames[index], arg.cell_contents))
+                parameters.append((varnames[index],
+                                   text_type(arg.cell_contents)))
     return unicodifier({
         "nicename": nicename,
         "doc": doc,
@@ -572,6 +578,8 @@ def get_workflow_info(func_list):
     """Return function info, go through lists recursively."""
     funcs = []
     for item in func_list:
+        if item is None:
+            continue
         if isinstance(item, list):
             funcs.append(get_workflow_info(item))
         else:
