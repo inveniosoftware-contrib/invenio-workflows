@@ -24,6 +24,10 @@
 Changes
 =======
 
-Version 0.1.0 (release 2015-08-13)
+Version 0.1.1 (released 2015-08-25)
+
+- Adds missing 'invenio-upgrader' dependency and ammends imports.
+
+Version 0.1.0 (released 2015-08-13)
 
 - Initial public release.

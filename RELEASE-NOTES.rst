@@ -1,8 +1,8 @@
 ==========================
- Invenio-Workflows v0.1.0
+ Invenio-Workflows v0.1.1
 ==========================
 
-Invenio-Workflows v0.1.0 was released on August 13, 2015.
+Invenio-Workflows v0.1.1 was released on August 25, 2015.
 
 About
 -----
@@ -11,20 +11,20 @@ Invenio module for running determined set of tasks.
 
 *This is an experimental development preview release.*
 
-What's new
-----------
+Bug fixes
+---------
 
-- Initial public release.
+- Adds missing 'invenio-upgrader' dependency and ammends imports.
 
 Installation
 ------------
 
-   $ pip install invenio-workflows==0.1.0
+   $ pip install invenio-workflows==0.1.1
 
 Documentation
 -------------
 
-   http://invenio-workflows.readthedocs.org/en/v0.1.0
+   http://invenio-workflows.readthedocs.org/en/v0.1.1
 
 Happy hacking and thanks for flying Invenio-Workflows.
 
