@@ -42,6 +42,7 @@ requirements = [
     'invenio-ext>=0.1.0',
     'invenio-upgrader>=0.1.0',
     'invenio-utils>=0.1.0',
+    'SQLAlchemy-Utils>=0.30.17',
 ]
 
 test_requirements = [

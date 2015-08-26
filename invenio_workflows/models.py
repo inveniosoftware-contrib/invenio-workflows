@@ -34,7 +34,7 @@ from six.moves import cPickle
 from sqlalchemy import desc
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_utils.types.choice import (
-    ChoiceType as BadChoiceType,
+    ChoiceType,
     ChoiceTypeImpl,
     Enum,
     EnumTypeImpl,
@@ -89,45 +89,6 @@ class CallbackPosType(db.PickleType):
         if not isinstance(value, Iterable):
             raise TypeError("Task counter must be an iterable!")
         return self.type_impl.process_bind_param(value, dialect)  # pylint: disable=no-member
-
-
-class FixedEnumTypeImpl(EnumTypeImpl):
-    """EnumTypeImpl at b6e22bd08f8efd9b3f157021edc9fdfea8ec3923"""
-
-    def _coerce(self, value):
-        if value is None:
-            return None
-        if value in self.enum_class:
-            return value
-        return self.enum_class(value)
-
-    def process_bind_param(self, value, dialect):
-        if value is None:
-            return None
-        return self.enum_class(value).value
-
-    def process_result_value(self, value, dialect):
-        if value is None:
-            return None
-        return self.enum_class(value)
-
-
-class ChoiceType(BadChoiceType):
-    """ChoiceType with patched EnumTypeImpl."""
-    def __init__(self, choices, impl=None):
-        self.choices = choices
-
-        if (
-            Enum is not None and
-            isinstance(choices, type) and
-            issubclass(choices, Enum)
-        ):
-            self.type_impl = FixedEnumTypeImpl(enum_class=choices)
-        else:
-            self.type_impl = ChoiceTypeImpl(choices=choices)
-
-        if impl:
-            self.impl = impl
 
 
 def _decode(data):
