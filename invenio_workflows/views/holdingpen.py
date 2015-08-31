@@ -33,15 +33,16 @@ import json
 import os
 
 from flask import (
-    abort,
     Blueprint,
+    abort,
     flash,
     jsonify,
     render_template,
     request,
     send_from_directory,
-    session,
+    session
 )
+
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 
 from flask_login import login_required
@@ -70,6 +71,7 @@ from ..utils import (
     get_rows,
     sort_bwolist
 )
+
 
 blueprint = Blueprint('holdingpen', __name__, url_prefix="/admin/holdingpen",
                       template_folder='../templates',
@@ -117,8 +119,12 @@ def index():
     Acts as a hub for catalogers (may be removed)
     """
     # TODO: Add user filtering
-    error_state = get_holdingpen_objects([ObjectVersion.name_from_version(ObjectVersion.ERROR)])
-    halted_state = get_holdingpen_objects([ObjectVersion.name_from_version(ObjectVersion.HALTED)])
+    error_state = get_holdingpen_objects(
+        [ObjectVersion.name_from_version(ObjectVersion.ERROR)]
+    )
+    halted_state = get_holdingpen_objects(
+        [ObjectVersion.name_from_version(ObjectVersion.HALTED)]
+    )
     return dict(error_state=error_state,
                 halted_state=halted_state)
 
@@ -219,6 +225,10 @@ def details(objectid):
     from itertools import groupby
 
     bwobject = BibWorkflowObject.query.get_or_404(objectid)
+    # FIXME(jacquerie): to be removed in workflows >= 2.0
+    bwobject.data = bwobject.get_data()
+    bwobject.extra_data = bwobject.get_extra_data()
+
     previous_object, next_object = get_previous_next_objects(
         session.get("holdingpen_current_ids"),
         objectid

@@ -178,7 +178,7 @@
                 <h3 class="panel-title">{{ _('Error occurred') }}</h3>
               </div>
               <div class="panel-body">
-                <h5>{{ bwobject.get_extra_data()['_last_task_name'] }}</h5>
+                <h5>{{ bwobject.extra_data['_last_task_name'] }}</h5>
                 <div class="text-right">
                   <h6 id="show-more" class="text-right">
                     <a role="button" data-toggle="modal" style="cursor: pointer" data-target="#error_details_modal" class="float-right">
@@ -191,7 +191,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h4 class="modal-title" id="myModalLabel">{{ _('Problem with') }}: {{ bwobject.get_extra_data()['_last_task_name'] }}</h4>
+                        <h4 class="modal-title" id="myModalLabel">{{ _('Problem with') }}: {{ bwobject.extra_data['_last_task_name'] }}</h4>
                       </div>
                       <div class="modal-body">
                         <p>{{ bwobject.get_error_message()[0] }}</p>
@@ -297,9 +297,9 @@
 
 
         {%- block action_alert -%}
-          {% if 'message' in bwobject.get_extra_data() and bwobject.get_action() != None %}
+          {% if 'message' in bwobject.extra_data and bwobject.get_action() != None %}
             <div id="usermessage" class="alert alert-warning alert-dismissible">
-              {{ bwobject.get_extra_data()['_message'] }}
+              {{ bwobject.extra_data['_message'] }}
               <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
             </div>
           {% endif %}
