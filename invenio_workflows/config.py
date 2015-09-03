@@ -24,3 +24,8 @@ WORKFLOWS_HOLDING_PEN_CACHE_TIMEOUT = 2629743  # one month
 
 WORKFLOWS_HOLDING_PEN_DEFAULT_OUTPUT_FORMAT = "hd"
 """The default timeout when formatting Holding Pen detailed pages."""
+
+WORKFLOWS_DATA_PROCESSORS = {
+    'json': 'json.load',
+    'marcxml': 'invenio_workflows.manage:split_marcxml',
+}
