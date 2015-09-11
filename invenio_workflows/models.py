@@ -28,8 +28,8 @@ import tempfile
 
 from datetime import datetime
 
-from invenio.base.globals import cfg
-from invenio.base.helpers import unicodifier
+from invenio_base.globals import cfg
+from invenio_base.helpers import unicodifier
 from invenio.ext.sqlalchemy import db
 from invenio.ext.sqlalchemy.utils import session_manager
 

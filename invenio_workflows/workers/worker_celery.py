@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2012, 2013, 2014 CERN.
+# Copyright (C) 2012, 2013, 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -20,7 +20,7 @@
 
 from invenio.celery import celery
 from invenio.ext.sqlalchemy.utils import session_manager
-from invenio.base.helpers import with_app_context
+from invenio_base.helpers import with_app_context
 
 from invenio_workflows.worker_result import AsynchronousResultWrapper
 from invenio_workflows.errors import WorkflowWorkerError

@@ -49,8 +49,8 @@ from flask_login import login_required
 
 from flask_menu import register_menu
 
-from invenio.base.decorators import templated, wash_arguments
-from invenio.base.i18n import _
+from invenio_base.decorators import templated, wash_arguments
+from invenio_base.i18n import _
 from invenio.ext.principal import permission_required
 from invenio.utils.date import pretty_date
 from invenio.utils.pagination import Pagination

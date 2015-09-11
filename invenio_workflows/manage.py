@@ -80,7 +80,7 @@ def list(verbose=False):
 
 def main():
     """Run manager."""
-    from invenio.base.factory import create_app
+    from invenio_base.factory import create_app
     app = create_app()
     manager.app = app
     manager.run()

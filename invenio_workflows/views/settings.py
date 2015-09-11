@@ -27,8 +27,8 @@ from flask_breadcrumbs import register_breadcrumb
 from flask_login import login_required
 from flask_menu import register_menu
 
-from invenio.base.decorators import templated
-from invenio.base.i18n import _
+from invenio_base.decorators import templated
+from invenio_base.i18n import _
 
 from .holdingpen import get_holdingpen_objects
 from ..models import ObjectVersion

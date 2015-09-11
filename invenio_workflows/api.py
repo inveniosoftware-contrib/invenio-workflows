@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2012, 2013, 2014 CERN.
+# Copyright (C) 2012, 2013, 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -24,8 +24,8 @@ this is the high level API you will want to use.
 """
 
 from werkzeug.utils import import_string, cached_property
-from invenio.base.globals import cfg
-from invenio.base.config import CFG_BIBWORKFLOW_WORKER
+from invenio_base.globals import cfg
+from invenio_base.config import CFG_BIBWORKFLOW_WORKER
 from .utils import BibWorkflowObjectIdContainer
 from .models import BibWorkflowObject
 from .errors import WorkflowWorkerError
