@@ -21,7 +21,8 @@
 
 from __future__ import absolute_import
 
-from invenio.celery import celery
+from invenio_celery import celery
+
 from invenio.testsuite import make_test_suite, run_test_suite
 
 from test_workflows import WorkflowTasksTestCase

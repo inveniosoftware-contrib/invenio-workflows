@@ -17,10 +17,9 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-
-from invenio.celery import celery
-
 from invenio_base.helpers import with_app_context
+
+from invenio_celery import celery
 
 from invenio_ext.sqlalchemy.utils import session_manager
 
