@@ -355,7 +355,7 @@ def check_term_in_data(term_list, data):
 
 def get_pretty_date(bwo):
     """Get the pretty date from bwo.created."""
-    from invenio.utils.date import pretty_date
+    from invenio_utils.date import pretty_date
     return pretty_date(bwo.created)
 
 

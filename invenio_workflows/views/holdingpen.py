@@ -55,8 +55,8 @@ from invenio_base.i18n import _
 
 from invenio_ext.principal import permission_required
 
-from invenio.utils.date import pretty_date
-from invenio.utils.pagination import Pagination
+from invenio_utils.date import pretty_date
+from invenio_utils.pagination import Pagination
 
 from six import text_type
 
