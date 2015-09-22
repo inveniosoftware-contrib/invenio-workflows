@@ -23,8 +23,6 @@ from __future__ import absolute_import
 
 from invenio_celery import celery
 
-from invenio.testsuite import make_test_suite, run_test_suite
-
 from test_workflows import WorkflowTasksTestCase
 
 
@@ -178,9 +176,3 @@ class WorkflowDelayedTest(WorkflowTasksTestCase):
                          "review_workflow"][0]["result"]["failed"])
         self.assertEqual(4, test_object.get_extra_data()["nbworkflowrunning"])
         self.assertEqual(21, engine.get_extra_data()["_nb_workflow_finish"])
-
-
-TEST_SUITE = make_test_suite(WorkflowDelayedTest)
-
-if __name__ == "__main__":
-    run_test_suite(TEST_SUITE)

@@ -29,7 +29,7 @@ import time
 
 from flask_registry import ImportPathRegistry
 
-from invenio.testsuite import InvenioTestCase, make_test_suite, run_test_suite
+from invenio_testing import InvenioTestCase
 
 
 TEST_PACKAGES = [
@@ -757,10 +757,3 @@ class TestWorkflowTasks(WorkflowTasksTestCase):
                          result_item.get("template"))
         self.assertEqual("test",
                          result_item.get("name"))
-
-
-TEST_SUITE = make_test_suite(WorkflowTasksTestAPI,
-                             TestWorkflowTasks)
-
-if __name__ == "__main__":
-    run_test_suite(TEST_SUITE)

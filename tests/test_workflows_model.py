@@ -22,7 +22,8 @@
 from __future__ import absolute_import
 
 from invenio_ext.sqlalchemy import db
-from invenio.testsuite import InvenioTestCase, make_test_suite, run_test_suite
+
+from invenio_testing import InvenioTestCase
 
 
 class TestWorkflowModels(InvenioTestCase):
@@ -73,9 +74,3 @@ class TestWorkflowModels(InvenioTestCase):
             db.session.query(
                 Workflow.query.filter(
                     Workflow.uuid == w_uuid).exists()).scalar())
-
-
-TEST_SUITE = make_test_suite(TestWorkflowModels)
-
-if __name__ == "__main__":
-    run_test_suite(TEST_SUITE)
