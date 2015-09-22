@@ -26,7 +26,7 @@ import sys
 
 from flask import current_app
 
-from invenio.ext.script import Manager
+from invenio_ext.script import Manager
 
 import six
 

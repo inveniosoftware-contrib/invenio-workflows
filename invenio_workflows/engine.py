@@ -27,7 +27,7 @@ import traceback
 
 from uuid import uuid1 as new_uuid
 
-from invenio.ext.sqlalchemy import db
+from invenio_ext.sqlalchemy import db
 
 from six import iteritems, reraise, text_type
 from six.moves import cPickle

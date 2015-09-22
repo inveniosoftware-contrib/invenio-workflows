@@ -19,11 +19,13 @@
 
 
 from invenio.celery import celery
-from invenio.ext.sqlalchemy.utils import session_manager
+
 from invenio_base.helpers import with_app_context
 
-from invenio_workflows.worker_result import AsynchronousResultWrapper
+from invenio_ext.sqlalchemy.utils import session_manager
+
 from invenio_workflows.errors import WorkflowWorkerError
+from invenio_workflows.worker_result import AsynchronousResultWrapper
 
 
 @celery.task(name='invenio_workflows.workers.worker_celery.run_worker')

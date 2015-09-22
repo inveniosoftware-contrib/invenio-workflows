@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # This file is part of Invenio.
-# Copyright (C) 2013, 2014 CERN.
+# Copyright (C) 2013, 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -16,7 +16,7 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-""" Logging part of workflows module."""
+"""Logging part of workflows module."""
 
 import logging
 
@@ -24,7 +24,6 @@ import logging
 def get_logger(logger_name, db_handler_obj, level=10, **kwargs):
     """
     Initialize and return a Python logger object.
-
 
     You can specifiy the handlers to output logs in sys.stderr as well as the
     datebase or anything you want.
@@ -72,8 +71,8 @@ class BibWorkflowLogHandler(logging.Handler, object):
         self.id_name = id_name
 
     def emit(self, record):
-        """ Create the log object in database."""
-        from invenio.ext.sqlalchemy import db
+        """Create the log object in database."""
+        from invenio_ext.sqlalchemy import db
 
         log_obj = self.model(id_object=getattr(record.obj, self.id_name),
                              log_type=record.levelno,
@@ -92,6 +91,6 @@ class BibWorkflowLogAdapter(logging.LoggerAdapter):
     """
 
     def process(self, msg, kwargs):
-        """ Save kwargs in extra."""
+        """Save kwargs in extra."""
         kwargs['extra'] = self.extra
         return msg, kwargs

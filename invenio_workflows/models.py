@@ -30,8 +30,9 @@ from datetime import datetime
 
 from invenio_base.globals import cfg
 from invenio_base.helpers import unicodifier
-from invenio.ext.sqlalchemy import db
-from invenio.ext.sqlalchemy.utils import session_manager
+
+from invenio_ext.sqlalchemy import db
+from invenio_ext.sqlalchemy.utils import session_manager
 
 from six import callable, iteritems
 from six.moves import cPickle
@@ -418,7 +419,7 @@ class BibWorkflowObject(db.Model):
             )
         except (KeyError, AttributeError):
             # Somehow the workflow or formatter does not exist
-            from invenio.ext.logging import register_exception
+            from invenio_ext.logging import register_exception
             register_exception(alert_admin=True)
             formatted_data = ""
         return formatted_data

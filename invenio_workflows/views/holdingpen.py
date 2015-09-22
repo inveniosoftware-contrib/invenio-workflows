@@ -30,6 +30,7 @@ For example, accepting submissions or other tasks.
 from __future__ import unicode_literals
 
 import json
+
 import os
 
 from flask import (
@@ -51,7 +52,9 @@ from flask_menu import register_menu
 
 from invenio_base.decorators import templated, wash_arguments
 from invenio_base.i18n import _
-from invenio.ext.principal import permission_required
+
+from invenio_ext.principal import permission_required
+
 from invenio.utils.date import pretty_date
 from invenio.utils.pagination import Pagination
 
@@ -182,9 +185,9 @@ def load(page, per_page, sort_key):
     session['holdingpen_per_page'] = per_page
     session['holdingpen_tags'] = tags
 
-    display_start = max(pagination.per_page*(pagination.page-1), 0)
+    display_start = max(pagination.per_page * (pagination.page - 1), 0)
     display_end = min(
-        pagination.per_page*pagination.page,
+        pagination.per_page * pagination.page,
         pagination.total_count
     )
     table_data["rows"] = get_rows(object_list[display_start:display_end])
@@ -221,7 +224,7 @@ def list_objects():
 def details(objectid):
     """Display info about the object."""
     from ..utils import get_workflow_info
-    from invenio.ext.sqlalchemy import db
+    from invenio_ext.sqlalchemy import db
     from itertools import groupby
 
     bwobject = BibWorkflowObject.query.get_or_404(objectid)

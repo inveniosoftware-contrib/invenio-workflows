@@ -28,6 +28,7 @@ from invenio_base.globals import cfg
 from werkzeug.utils import cached_property, import_string
 
 from .errors import WorkflowWorkerError
+
 from .utils import BibWorkflowObjectIdContainer
 
 

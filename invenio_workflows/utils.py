@@ -25,7 +25,9 @@ from operator import attrgetter
 
 from flask import current_app, jsonify, render_template
 
-from invenio.ext.cache import cache
+from invenio_base.helpers import unicodifier
+
+from invenio_ext.cache import cache
 
 from invenio_base.helpers import unicodifier
 

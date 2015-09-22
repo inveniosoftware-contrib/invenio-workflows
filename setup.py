@@ -38,6 +38,7 @@ requirements = [
     'six>=1.7.2',
     'workflow>=1.2.0,<2.0.0',
     'invenio-base>=0.2.1',
+    'invenio-ext>=0.1.0',
     'invenio-upgrader>=0.1.0',
 ]
 

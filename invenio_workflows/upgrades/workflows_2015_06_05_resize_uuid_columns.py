@@ -19,7 +19,8 @@
 
 """Upgrade recipe."""
 
-from invenio.ext.sqlalchemy import db
+from invenio_ext.sqlalchemy import db
+
 from invenio_upgrader.api import op
 
 depends_on = [u'workflows_2014_08_12_initial']

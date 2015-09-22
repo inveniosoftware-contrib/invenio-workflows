@@ -18,8 +18,10 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 import inspect
-from invenio.ext.registry import DictModuleAutoDiscoverySubRegistry
+
 from flask_registry import RegistryError, RegistryProxy
+
+from invenio_ext.registry import DictModuleAutoDiscoverySubRegistry
 
 
 class WorkflowsRegistry(DictModuleAutoDiscoverySubRegistry):
@@ -54,4 +56,4 @@ class WorkflowsRegistry(DictModuleAutoDiscoverySubRegistry):
 workflows = RegistryProxy('workflows', WorkflowsRegistry, 'workflows')
 actions = RegistryProxy('workflows.actions', WorkflowsRegistry, 'actions')
 
-__all__ = ['actions', 'workflows']
+__all__ = ('actions', 'workflows')
