@@ -17,18 +17,17 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""Example of a typical ingestion workflow for MARCXML records."""
+"""Showcase a sample workflow definition."""
 
-from ..tasks.marcxml_tasks import (
-    approve_record,
-    convert_record,
-)
-from ..definitions import WorkflowBase
+from invenio_workflows.definitions import WorkflowBase
+from invenio_workflows.tasks.logic_tasks import execute_if
+from invenio_workflows.tasks.sample_tasks import add_data, approve_record
 
 
-class marcxml_workflow(WorkflowBase):  # noqa
+class demo_workflow_approve(WorkflowBase):
 
-    """This workflow converts MARCXML records and waits for approval."""
+    """This is a sample workflow."""
 
-    workflow = [convert_record(stylesheet='oaiarxiv2marcxml.xsl'),
+    workflow = [execute_if(add_data(1), lambda obj, eng: True),
                 approve_record]
+    title = "Sample workflow"

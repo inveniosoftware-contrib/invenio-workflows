@@ -25,8 +25,9 @@ from operator import attrgetter
 
 from flask import current_app, jsonify, render_template
 
-from invenio_base.helpers import unicodifier
 from invenio.ext.cache import cache
+
+from invenio_base.helpers import unicodifier
 
 import msgpack
 
@@ -35,32 +36,6 @@ from six import text_type
 from sqlalchemy import or_
 
 from .registry import actions, workflows
-
-
-def convert_marcxml_to_bibfield(marcxml, model=None):
-    """Return a SmartJson representation of MARC XML string.
-
-    This function converts a MARCXML string to a JSON-like
-    dictionary using the the jsonalchemy (aka. BibField) config.
-
-    :param marcxml: MARCXML string to parse
-    :type marcxml: string
-
-    :return: SmartJson object.
-    """
-    from invenio.modules.jsonalchemy.reader import Reader
-    from invenio.modules.jsonalchemy.wrappers import SmartJson
-
-    if not model:
-        model = ["__default__"]
-
-    if isinstance(marcxml, text_type):
-        marcxml = marcxml.encode(errors='ignore')
-    return Reader.translate(marcxml,
-                            SmartJson,
-                            master_format='marc',
-                            namespace='recordext',
-                            model=model)
 
 
 class BibWorkflowObjectIdContainer(object):

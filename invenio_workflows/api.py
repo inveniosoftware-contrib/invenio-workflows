@@ -23,12 +23,12 @@ If you want to run a workflow using the workflows module,
 this is the high level API you will want to use.
 """
 
-from werkzeug.utils import import_string, cached_property
 from invenio_base.globals import cfg
-from invenio_base.config import CFG_BIBWORKFLOW_WORKER
-from .utils import BibWorkflowObjectIdContainer
-from .models import BibWorkflowObject
+
+from werkzeug.utils import cached_property, import_string
+
 from .errors import WorkflowWorkerError
+from .utils import BibWorkflowObjectIdContainer
 
 
 class WorkerBackend(object):
@@ -53,10 +53,10 @@ class WorkerBackend(object):
         try:
             return import_string('invenio_workflows.workers.%s:%s' % (
                 cfg['CFG_BIBWORKFLOW_WORKER'], cfg['CFG_BIBWORKFLOW_WORKER']))
-        except:
-            from invenio.ext.logging import register_exception
+        except Exception:
+            from flask import current_app
             # Let's report about broken plugins
-            register_exception(alert_admin=True)
+            current_app.logger.exception()
 
     def __call__(self, *args, **kwargs):
         """Action on call."""
@@ -120,7 +120,9 @@ def start_delayed(workflow_name, data, **kwargs):
 
     :return: AsynchronousResultWrapper
     """
-    if not CFG_BIBWORKFLOW_WORKER:
+    from .models import BibWorkflowObject
+
+    if not cfg["CFG_BIBWORKFLOW_WORKER"]:
         raise WorkflowWorkerError('No worker configured')
 
     # The goal of this part is to avoid a SQLalchemy decoherence in case
@@ -197,6 +199,8 @@ def start_by_oids(workflow_name, oids, **kwargs):
 
     :return: BibWorkflowEngine that ran the workflow.
     """
+    from .models import BibWorkflowObject
+
     if not oids:
         from .errors import WorkflowAPIError
         raise WorkflowAPIError("No Object IDs are defined")
@@ -228,6 +232,8 @@ def start_by_oids_delayed(workflow_name, oids, **kwargs):
 
     :return: AsynchronousResultWrapper.
     """
+    from .models import BibWorkflowObject
+
     if not oids:
         from .errors import WorkflowAPIError
         raise WorkflowAPIError("No Object IDs are defined")
@@ -314,7 +320,7 @@ def resume_objects_in_workflow(id_workflow, start_point="continue_next",
 
     yield: BibWorkflowEngine that ran the workflow
     """
-    from .models import ObjectVersion
+    from .models import ObjectVersion, BibWorkflowObject
 
     # Resume workflow if there are objects to resume
     objects = BibWorkflowObject.query.filter(

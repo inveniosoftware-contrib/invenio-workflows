@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+#
 # This file is part of Invenio.
-# Copyright (C) 2014 CERN.
+# Copyright (C) 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -16,21 +17,24 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-""" Implements a workflow for testing. """
+"""Implements a workflow for testing."""
 
-from invenio_workflows.tasks.workflows_tasks import (
-    start_async_workflow,
-    workflows_reviews,
-    wait_for_a_workflow_to_complete,
-    log_info,
-    get_nb_workflow_running,
-    num_workflow_running_greater,
-    wait_for_workflows_to_complete
+from invenio_workflows.tasks.logic_tasks import (
+    end_for,
+    simple_for,
+    workflow_else,
+    workflow_if,
 )
-
-from invenio_workflows.tasks.logic_tasks import simple_for, end_for, workflow_if, workflow_else
-
-from invenio_workflows.tasks.marcxml_tasks import set_obj_extra_data_key
+from invenio_workflows.tasks.sample_tasks import set_obj_extra_data_key
+from invenio_workflows.tasks.workflows_tasks import (
+    get_nb_workflow_running,
+    log_info,
+    num_workflow_running_greater,
+    start_async_workflow,
+    wait_for_a_workflow_to_complete,
+    wait_for_workflows_to_complete,
+    workflows_reviews,
+)
 
 
 class demo_workflow_workflows(object):

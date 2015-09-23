@@ -362,15 +362,16 @@ distances from it.
             self.assertTrue(obj.get_data() in final_data)
             self.assertTrue(obj.child_objects[0].get_data() in self.test_data)
 
-    def test_workflow_marcxml(self):
+    def test_workflow_approve_step(self):
         """Test runnning a record ingestion workflow with a action step."""
         from invenio_workflows.models import (BibWorkflowObject,
                                               ObjectVersion)
         from invenio_workflows.engine import WorkflowStatus
         from invenio_workflows.api import start
 
-        initial_data = self.recxml
-        workflow = start(workflow_name="marcxml_workflow", data=[initial_data],
+        initial_data = 1
+        workflow = start(workflow_name="demo_workflow_approve",
+                         data=[initial_data],
                          module_name="unit_tests")
 
         # Get objects of the workflow we just ran
@@ -404,10 +405,10 @@ distances from it.
         from invenio_workflows.engine import WorkflowStatus
 
         current = BibWorkflowObject()
-        current.set_data(self.recxml)
+        current.set_data(1)
         current.save()
 
-        workflow = start(workflow_name="marcxml_workflow",
+        workflow = start(workflow_name="demo_workflow_approve",
                          data=[current],
                          module_name="unit_tests")
 

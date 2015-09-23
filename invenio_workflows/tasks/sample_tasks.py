@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2013, 2014 CERN.
+# Copyright (C) 2013, 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -24,6 +24,27 @@ import time
 from functools import wraps
 
 
+def approve_record(obj, eng):
+    """Will add the approval widget to the record.
+
+    The workflow need to be halted to use the
+    action in the holdingpen.
+    :param obj: Bibworkflow Object to process
+    :param eng: BibWorkflowEngine processing the object
+    """
+    try:
+        eng.halt(action="approval",
+                 msg='Record needs approval')
+    except KeyError:
+        # Log the error
+        obj.extra_data["_error_msg"] = 'Could not assign action'
+
+
+def was_approved(obj, eng):
+    """Check if the record was approved."""
+    return bool(obj.extra_data.get("approved"))
+
+
 def add_data(data_param):
     """Add data_param to obj.data."""
     @wraps(add_data)
@@ -33,6 +54,55 @@ def add_data(data_param):
         obj.data += data
 
     return _add_data
+
+
+def set_data(data):
+    """Task using closure to allow parameters and change data."""
+    @wraps(set_data)
+    def _set_data(obj, eng):
+        obj.data = data
+
+    return _set_data
+
+
+def get_data(obj, eng):
+    """Task returning data of the object."""
+    return obj.data
+
+
+def set_obj_extra_data_key(key, value):
+    """Task setting the value of an object extra data key."""
+    @wraps(set_obj_extra_data_key)
+    def _set_obj_extra_data_key(obj, eng):
+        my_value = value
+        my_key = key
+        if callable(my_value):
+            while callable(my_value):
+                my_value = my_value(obj, eng)
+        if callable(my_key):
+            while callable(my_key):
+                my_key = my_key(obj, eng)
+        obj.extra_data[str(my_key)] = my_value
+
+    return _set_obj_extra_data_key
+
+
+def get_obj_extra_data_key(name):
+    """Task returning the value of an object extra data key."""
+    @wraps(get_obj_extra_data_key)
+    def _get_obj_extra_data_key(obj, eng):
+        return obj.extra_data[name]
+
+    return _get_obj_extra_data_key
+
+
+def get_eng_extra_data_key(name):
+    """Task returning the value of an engine extra data key."""
+    @wraps(get_eng_extra_data_key)
+    def _get_eng_extra_data_key(obj, eng):
+        return eng.extra_data[name]
+
+    return _get_eng_extra_data_key
 
 
 def generate_error(obj, eng):
@@ -67,15 +137,6 @@ def halt_if_data_less_than(threshold):
             eng.halt("Value of data is too small.")
 
     return _halt_if_data_less_than
-
-
-def set_data(data):
-    """Task using closure to allow parameters and change data."""
-    @wraps(set_data)
-    def _set_data(obj, eng):
-        obj.data = data
-
-    return _set_data
 
 
 def reduce_data_by_one(times):
