@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # This file is part of Invenio.
-# Copyright (C) 2013, 2014 CERN.
+# Copyright (C) 2013, 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -101,8 +101,8 @@ class WorkflowDefinitionError(Exception):
     def __str__(self):
         """String representation."""
         return "WorkflowDefinitionError(%s, workflow_name: %s, payload: %r)" % \
-               (str(self.message), self.workflow_name, repr(self.payload)
-                or "None")
+               (str(self.message), self.workflow_name, repr(self.payload) or
+                "None")
 
 
 class WorkflowWorkerError(Exception):

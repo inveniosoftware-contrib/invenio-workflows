@@ -17,6 +17,8 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
+"""Registry for workflow definitions found."""
+
 import inspect
 
 from flask_registry import RegistryError, RegistryProxy
@@ -38,7 +40,7 @@ class WorkflowsRegistry(DictModuleAutoDiscoverySubRegistry):
                 return None
 
             if hasattr(class_or_module, attr_name):
-                #key = attr_name if key is None else key
+                # key = attr_name if key is None else key
                 return getattr(class_or_module, attr_name)
             else:
                 all_ = getattr(class_or_module, '__all__', [])
