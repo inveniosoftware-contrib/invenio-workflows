@@ -1,6 +1,6 @@
 ..
     This file is part of Invenio.
-    Copyright (C) 2015 CERN.
+    Copyright (C) 2016 CERN.
 
     Invenio is free software; you can redistribute it
     and/or modify it under the terms of the GNU General Public License as
@@ -21,62 +21,43 @@
     waive the privileges and immunities granted to it by virtue of its status
     as an Intergovernmental Organization or submit itself to any jurisdiction.
 
+
 .. include:: ../README.rst
 
-Contents:
-=========
+User's Guide
+------------
+
+This part of the documentation will show you how to get started in using
+Invenio-Workflows.
 
 .. toctree::
    :maxdepth: 2
 
-
-API
-===
-
-.. automodule:: invenio_workflows
-   :members:
+   installation
+   usage
 
 
-.. automodule:: invenio_workflows.api
-   :members:
+API Reference
+-------------
 
-Models
-------
+If you are looking for information on a specific function, class or method,
+this part of the documentation is for you.
 
-.. automodule:: invenio_workflows.models
-   :members:
+.. toctree::
+   :maxdepth: 2
 
+   api
 
-Engine
-------
+Additional Notes
+----------------
 
-.. automodule:: invenio_workflows.engine
-   :members:
+Notes on how to contribute, legal information and changes are here for the
+interested.
 
+.. toctree::
+   :maxdepth: 1
 
-Workers
--------
-
-.. automodule:: invenio_workflows.worker_engine
-   :members:
-
-.. automodule:: invenio_workflows.worker_result
-   :members:
-
-Views
------
-
-.. automodule:: invenio_workflows.views
-   :members:
-
-.. automodule:: invenio_workflows.views.holdingpen
-   :members:
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+   contributing
+   changes
+   license
+   authors

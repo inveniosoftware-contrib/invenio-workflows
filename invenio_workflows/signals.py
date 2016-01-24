@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2014, 2015 CERN.
+# Copyright (C) 2014, 2015, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -20,30 +20,22 @@
 """Contain signals emitted from workflows module."""
 
 from flask.signals import Namespace
+from workflow.signals import workflow_error, workflow_finished, \
+    workflow_halted, workflow_started
+
 _signals = Namespace()
 
-workflow_halted = _signals.signal('workflow_halted')
-"""
-This signal is sent when a workflow engine's halt function is called.
-Sender is the BibWorkflowObject that was running before the workflow
-was halted.
-"""
+workflow_object_before_save = _signals.signal('workflow_object_before_save')
+"""This signal is sent when a workflow object is saved."""
 
-workflow_started = _signals.signal('workflow_started')
-"""
-This signal is sent when a workflow is started.
-Sender is the workflow engine object running the workflow.
-"""
+workflow_object_after_save = _signals.signal('workflow_object_after_save')
+"""This signal is sent when a workflow object is saved."""
 
-workflow_finished = _signals.signal('workflow_finished')
-"""
-This signal is sent when a workflow is finished.
-Sender is the workflow engine object running the workflow.
-"""
-
-workflow_error = _signals.signal('workflow_error')
-"""
-This signal is sent when a workflow object gets an error.
-Sender is the BibWorkflowObject that was running before the workflow
-got the error.
-"""
+__all__ = (
+    'workflow_finished',
+    'workflow_halted',
+    'workflow_started',
+    'workflow_error',
+    'workflow_object_after_save',
+    'workflow_object_before_save'
+)

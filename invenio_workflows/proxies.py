@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2012, 2013, 2014, 2015 CERN.
+# Copyright (C) 2012, 2013, 2014, 2015, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -10,22 +10,20 @@
 #
 # Invenio is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""Implements a workflow for testing."""
+"""Registry for workflow definitions found."""
 
-from ..tasks import add_data, halt_if_data_less_than, reduce_data_by_one
+from flask import current_app
+from werkzeug.local import LocalProxy
 
+workflows = LocalProxy(
+    lambda: current_app.extensions['invenio-workflows'].workflows
+)
 
-class demo_workflow(object):
-
-    """A test workflow for the testsuite."""
-
-    workflow = [halt_if_data_less_than(20),
-                add_data(20),
-                reduce_data_by_one(2)]
+__all__ = ('workflows',)

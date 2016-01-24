@@ -1,3 +1,4 @@
+#!/bin/bash
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
@@ -22,12 +23,9 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Version information for invenio-workflows.
-
-This file is imported by ``invenio_workflows.__init__``,
-and parsed by ``setup.py``.
-"""
-
-from __future__ import absolute_import, print_function
-
-__version__ = "1.0.0a1.dev20160126"
+pydocstyle invenio_workflows && \
+# isort -rc -c -df **/*.py && \  irratic behaviour on travis
+check-manifest --ignore ".travis-*" && \
+sphinx-build -qnNW docs docs/_build/html && \
+python setup.py test && \
+sphinx-build -qnNW -b doctest docs docs/_build/doctest

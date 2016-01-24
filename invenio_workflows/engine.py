@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2012, 2013, 2014, 2015 CERN.
+# Copyright (C) 2012, 2013, 2014, 2015, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -17,44 +17,28 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""The workflow engine extension of GenericWorkflowEngine."""
+"""The workflow engine extension of `workflow.DbWorkflowEngine`."""
 
 from __future__ import absolute_import
 
+import traceback
 from copy import deepcopy
 from uuid import uuid1 as new_uuid
 
-from invenio.ext.sqlalchemy import db
-
-from workflow.engine import (
-    ActionMapper,
-    Break,
-    Continue,
-    TransitionActions,
-)
-from workflow.engine_db import (
-    DbProcessingFactory,
-    DbTransitionAction,
-    DbWorkflowEngine,
-    WorkflowStatus,
-)
+from flask import current_app
+from invenio_db import db
+from workflow.engine import ActionMapper, Break, Continue, ProcessingFactory, \
+    TransitionActions
+from workflow.engine_db import DbWorkflowEngine, WorkflowStatus
 from workflow.errors import WorkflowDefinitionError
 from workflow.utils import staticproperty
 
 from .errors import WaitProcessing
-from .logger import DbWorkflowLogHandler, get_logger
-from .models import (
-    DbWorkflowObject,
-    DbWorkflowEngineLog,
-    ObjectStatus,
-    Workflow,
-    get_default_extra_data,
-)
+from .models import ObjectStatus, Workflow, WorkflowObject
 from .utils import get_task_history
 
 
-class BibWorkflowEngine(DbWorkflowEngine):
-
+class WorkflowEngine(DbWorkflowEngine):
     """Special engine for Invenio.
 
     The reason why base64 is used throughout this class is due to a bug in
@@ -63,13 +47,20 @@ class BibWorkflowEngine(DbWorkflowEngine):
     base64 encoding it first.
     """
 
-    def __init__(self, db_obj, **extra_data):
+    def __init__(self, db_obj=None, name=None, id_user=None, **extra_data):
         """Special handling of instantiation of engine."""
         # Super's __init__ clears extra_data, which we override to be
         # db_obj.extra_data. We work around this by temporarily storing it
         # elsewhere.
+        if not db_obj:
+            db_obj = Workflow(
+                name=name,
+                id_user=id_user,
+                uuid=new_uuid()
+            )
+            db_obj.save(WorkflowStatus.NEW)
         _extra_data = deepcopy(db_obj.extra_data)
-        super(BibWorkflowEngine, self).__init__(db_obj)
+        super(WorkflowEngine, self).__init__(db_obj)
         self.extra_data = _extra_data
 
         self.extra_data.update(extra_data)
@@ -95,8 +86,8 @@ class BibWorkflowEngine(DbWorkflowEngine):
         self.__dict__[name] = val
 
     @classmethod
-    def with_name(cls, name, id_user=0, module_name="Unknown", **extra_data):
-        """Instantiate a DbWorkflowEngine given a name or UUID.
+    def with_name(cls, name, id_user=0, **extra_data):
+        """Instantiate a WorkflowEngine given a name or UUID.
 
         :param name: name of workflow to run.
         :type name: str
@@ -107,18 +98,11 @@ class BibWorkflowEngine(DbWorkflowEngine):
         :param module_name: label used to query groups of workflows.
         :type module_name: str
         """
-        db_obj = Workflow(
-            name=name,
-            id_user=id_user,
-            module_name=module_name,
-            uuid=new_uuid(),
-            # status=WorkflowStatus.NEW,   # XXX Temporary
-        )
-        return cls(db_obj, **extra_data)
+        return cls(name=name, id_user=0, **extra_data)
 
     @classmethod
     def from_uuid(cls, uuid, **extra_data):
-        """Load a workflow from the database given a UUID.
+        """Load an existing workflow from the database given a UUID.
 
         :param uuid: pass a uuid to an existing workflow.
         :type uuid: str
@@ -128,7 +112,12 @@ class BibWorkflowEngine(DbWorkflowEngine):
             raise LookupError(
                 "No workflow with UUID {} was found".format(uuid)
             )
-        return cls(db_obj, **extra_data)
+        instance = cls(db_obj=db_obj, **extra_data)
+        instance.objects = WorkflowObject.query.filter(
+            WorkflowObject.id_workflow == uuid,
+            WorkflowObject.id_parent == None,  # noqa
+        ).all()
+        return instance
 
     @property
     def db(self):
@@ -137,12 +126,13 @@ class BibWorkflowEngine(DbWorkflowEngine):
 
     @staticproperty
     def object_status():  # pylint: disable=no-method-argument
+        """Return ObjectStatus type."""
         return ObjectStatus
 
     @staticproperty
     def processing_factory():  # pylint: disable=no-method-argument
         """Provide a proccessing factory."""
-        return InvProcessingFactory
+        return InvenioProcessingFactory
 
     @property
     def uuid(self):
@@ -154,29 +144,17 @@ class BibWorkflowEngine(DbWorkflowEngine):
         """Return the user id."""
         return self.db_obj.id_user
 
-    @property
-    def module_name(self):
-        """Return the module name."""
-        return self.db_obj.module_name
-
-    def wait(self, msg="", action=None, payload=None):
+    def wait(self, msg=""):
         """Halt the workflow (stop also any parent `wfe`).
 
         Halts the currently running workflow by raising WaitProcessing.
 
-        You can provide a message and the name of an action to be taken
-        (from an action in actions registry).
-
         :param msg: message explaining the reason for halting.
         :type msg: str
 
-        :param action: name of valid action in actions registry.
-        :type action: str
-
         :raises: WaitProcessing
         """
-        # FIXME: action is not used anywhere
-        raise WaitProcessing(message=msg, action=action, payload=payload)
+        raise WaitProcessing(message=msg)
 
     def continue_object(self, workflow_object, restart_point='restart_task',
                         task_offset=1, stop_on_halt=False):
@@ -204,20 +182,18 @@ class BibWorkflowEngine(DbWorkflowEngine):
 
     def init_logger(self):
         """Return the appropriate logger instance."""
-        db_handler_obj = DbWorkflowLogHandler(DbWorkflowEngineLog, "uuid")
-        return get_logger(logger_name="workflow.%s" % self.db_obj.uuid,
-                          db_handler_obj=db_handler_obj, obj=self)
+        return current_app.logger
 
     @property
     def has_completed(self):
         """Return True if workflow is fully completed."""
-        res = self.db.session.query(self.db.func.count(DbWorkflowObject.id)).\
-            filter(DbWorkflowObject.id_workflow == self.uuid).\
-            filter(DbWorkflowObject.status.in_(
-                [DbWorkflowObject.known_statuses.INITIAL,
-                 DbWorkflowObject.known_statuses.COMPLETED]
-            )).group_by(DbWorkflowObject.status).all()
-        return len(res) == 2 and res[0] == res[1]
+        objects_in_db = WorkflowObject.query.filter(
+            WorkflowObject.id_workflow == self.uuid,
+            WorkflowObject.id_parent == None,  # noqa
+        ).filter(WorkflowObject.status.in_([
+            WorkflowObject.known_statuses.COMPLETED
+        ])).count()
+        return objects_in_db == len(list(self.objects))
 
     def set_workflow_by_name(self, workflow_name):
         """Configure the workflow to run by the name of this one.
@@ -228,122 +204,140 @@ class BibWorkflowEngine(DbWorkflowEngine):
         :param workflow_name: name of the workflow.
         :type workflow_name: str
         """
-        from .registry import workflows
+        from .proxies import workflows
+
         if workflow_name not in workflows:
             # No workflow with that name exists
             raise WorkflowDefinitionError("Workflow '%s' does not exist"
                                           % (workflow_name,),
                                           workflow_name=workflow_name)
         self.workflow_definition = workflows[workflow_name]
-        self.setWorkflow(self.workflow_definition.workflow)
+        self.callbacks.replace(self.workflow_definition.workflow)
 
     def get_default_data_type(self):
         """Return default data type from workflow definition."""
-        return getattr(self.workflow_definition, "object_type", "")
+        return getattr(self.workflow_definition, "data_type", "")
+
+    def reset_extra_data(self):
+        """Reset extra data to defaults."""
+        self.db_obj.extra_data = {}
 
     def __repr__(self):
-        """Allow to represent the BibWorkflowEngine."""
-        return "<BibWorkflow_engine(%s)>" % (self.name,)
+        """Allow to represent the WorkflowEngine."""
+        return "<WorkflowEngine (name={0}, status={1})>".format(
+            self.name, self.status
+        )
 
-    def __str__(self, log=False):
-        """Allow to print the BibWorkflowEngine."""
+    def __str__(self):
+        """Allow to print the WorkflowEngine."""
         return """-------------------------------
-BibWorkflowEngine
+WorkflowEngine
 -------------------------------
     %s
 -------------------------------
 """ % (self.db_obj.__str__(),)
 
-    # Deprecated
-    def get_extra_data(self):
-        """Main method to retrieve data saved to the object."""
-        return self.db_obj.extra_data
 
-    # Deprecated
-    def set_extra_data(self, value):
-        """Main method to update data saved to the object."""
-        self.db_obj.extra_data = value
-
-    def reset_extra_data(self):
-        """Reset extra data to defaults."""
-        self.db_obj.extra_data = get_default_extra_data()
-
-    # Deprecated
-    def extra_data_get(self, key):
-        """Get a key value in extra data."""
-        if key not in self.db_obj.extra_data:
-            raise KeyError("%s not in extra_data" % (key,))
-        return self.db_obj.extra_data[key]
-
-    # Deprecated
-    def extra_data_set(self, key, value):
-        """Add a key value pair in extra_data."""
-        self.db_obj.extra_data[key] = value
-
-    # Deprecated
-    def set_extra_data_params(self, **kwargs):
-        """Add keys/value in extra_data.
-
-        Allows the addition of value in the extra_data dictionary,
-        all the data must be passed as "key=value".
-        """
-        self.db_obj.extra_data.update(kwargs)
-
-    # Deprecated
-    def get_current_object(self):
-        return self.current_object
-
-    # Deprecated
-    def objects_of_statuses(self, statuses):
-        results = []
-        for obj in self.database_objects:
-            if obj.status in statuses:
-                results.append(obj)
-        return results
-
-
-class InvActionMapper(ActionMapper):
+class InvenioActionMapper(ActionMapper):
+    """Map workflow engine callbacks to functions."""
 
     @staticmethod
     def before_each_callback(eng, callback_func, obj):
         """Action to take before every WF callback."""
-        eng.extra_data = eng.get_extra_data()
-        eng.log.debug("Executing callback %s" % (repr(callback_func),))
+        eng.log.info("Executing callback %s" % (repr(callback_func),))
 
     @staticmethod
     def after_each_callback(eng, callback_func, obj):
         """Action to take after every WF callback."""
         obj.callback_pos = eng.state.callback_pos
-        obj.extra_data["_last_task_name"] = callback_func.func_name
+        obj.extra_data["_last_task_name"] = callback_func.__name__
         task_history = get_task_history(callback_func)
-        if "_task_history" not in obj:
+        if "_task_history" not in obj.extra_data:
             obj.extra_data["_task_history"] = [task_history]
         else:
             obj.extra_data["_task_history"].append(task_history)
 
 
-class InvProcessingFactory(DbProcessingFactory):
+class InvenioProcessingFactory(ProcessingFactory):
+    """Map workflow processing callbacks to functions."""
 
     @staticproperty
     def transition_exception_mapper():  # pylint: disable=no-method-argument
         """Define our for handling transition exceptions."""
-        return InvTransitionAction
+        return InvenioTransitionAction
 
     @staticproperty
     def action_mapper():  # pylint: disable=no-method-argument
         """Set a mapper for actions while processing."""
-        return InvActionMapper
+        return InvenioActionMapper
 
     @staticmethod
     def before_object(eng, objects, obj):
-        """Action to take before the proccessing of an object begins."""
-        obj.reset_error_message()
-        super(InvProcessingFactory, InvProcessingFactory).before_object(
+        """Action to take before the processing of an object begins."""
+        super(InvenioProcessingFactory, InvenioProcessingFactory)\
+            .before_object(
             eng, objects, obj
         )
+        if "_error_msg" in obj.extra_data:
+            del obj.extra_data["_error_msg"]
+        db.session.commit()
+
+    @staticmethod
+    def after_object(eng, objects, obj):
+        """Action to take once the proccessing of an object completes."""
+        # We save each object once it is fully run through
+        super(InvenioProcessingFactory, InvenioProcessingFactory)\
+            .after_object(eng, objects, obj)
+        obj.save(
+            status=obj.known_statuses.COMPLETED,
+            id_workflow=eng.db_obj.uuid
+        )
+        db.session.commit()
+
+    @staticmethod
+    def before_processing(eng, objects):
+        """Executed before processing the workflow."""
+        super(InvenioProcessingFactory, InvenioProcessingFactory)\
+            .before_processing(eng, objects)
+        eng.save(WorkflowStatus.RUNNING)
+        db.session.commit()
+
+    @staticmethod
+    def after_processing(eng, objects):
+        """Action after process to update status."""
+        super(InvenioProcessingFactory, InvenioProcessingFactory)\
+            .after_processing(eng, objects)
+        if eng.has_completed:
+            eng.save(WorkflowStatus.COMPLETED)
+        else:
+            eng.save(WorkflowStatus.HALTED)
+        db.session.commit()
 
 
-class InvTransitionAction(DbTransitionAction):
+class InvenioTransitionAction(TransitionActions):
+    """Map workflow processing exception handlers to functions."""
+
+    @staticmethod
+    def Exception(obj, eng, callbacks, exc_info):
+        """Handle general exceptions in workflow, saving states."""
+        exception_repr = ''.join(traceback.format_exception(*exc_info))
+        msg = "Error:\n%s" % (exception_repr)
+        eng.log.error(msg)
+        if obj:
+            # Sets an error message as a tuple (title, details)
+            obj.extra_data['_error_msg'] = exception_repr
+            obj.save(
+                status=obj.known_statuses.ERROR,
+                callback_pos=eng.state.callback_pos,
+                id_workflow=eng.uuid
+            )
+        eng.save(WorkflowStatus.ERROR)
+        db.session.commit()
+
+        # Call super which will reraise
+        super(InvenioTransitionAction, InvenioTransitionAction).Exception(
+            obj, eng, callbacks, exc_info
+        )
 
     @staticmethod
     def WaitProcessing(obj, eng, callbacks, exc_info):
@@ -352,6 +346,9 @@ class InvTransitionAction(DbTransitionAction):
         ..note::
             We're essentially doing HaltProcessing, plus `obj.set_action` and
             object status `WAITING` instead of `HALTED`.
+
+            This is not present in TransitionActions so that's why it is not
+            calling super in this case.
         """
         e = exc_info[1]
         obj.set_action(e.action, e.message)
@@ -359,12 +356,18 @@ class InvTransitionAction(DbTransitionAction):
                  callback_pos=eng.state.callback_pos,
                  id_workflow=eng.uuid)
         eng.save(WorkflowStatus.HALTED)
-        eng.log.warning("Workflow '%s' halted at task %s with message: %s",
+        eng.log.warning("Workflow '%s' waiting at task %s with message: %s",
                         eng.name, eng.current_taskname or "Unknown", e.message)
-        TransitionActions.HaltProcessing(obj, eng, callbacks, exc_info)
+        db.session.commit()
+
+        # Call super which will reraise
+        TransitionActions.HaltProcessing(
+            obj, eng, callbacks, exc_info
+        )
 
     @staticmethod
     def HaltProcessing(obj, eng, callbacks, exc_info):
+        """Handle halted exception in workflow, saving states."""
         e = exc_info[1]
         if e.action:
             obj.set_action(e.action, e.message)
@@ -372,20 +375,20 @@ class InvTransitionAction(DbTransitionAction):
                      callback_pos=eng.state.callback_pos,
                      id_workflow=eng.uuid)
             eng.save(WorkflowStatus.HALTED)
-            TransitionActions.HaltProcessing(obj, eng, callbacks, exc_info)
-            eng.log.warning(
-                "Workflow '%s' waiting at task %s with message: %s",
+            obj.log.warning(
+                "Workflow '%s' halted at task %s with message: %s",
                 eng.name, eng.current_taskname or "Unknown", e.message
             )
-        else:
-            from invenio.utils.deprecation import RemovedInInvenio23Warning
-            import warnings
-            warnings.warn(
-                "Raising HaltProcessing with e.action to emulate "
-                "WaitProcessing is deprecated. Use eng.wait() instead",
-                RemovedInInvenio23Warning
+            db.session.commit()
+
+            # Call super which will reraise
+            TransitionActions.HaltProcessing(
+                obj, eng, callbacks, exc_info
             )
-            InvTransitionAction.WaitProcessing(obj, eng, callbacks, exc_info)
+        else:
+            InvenioTransitionAction.WaitProcessing(
+                obj, eng, callbacks, exc_info
+            )
 
     @staticmethod
     def StopProcessing(obj, eng, callbacks, exc_info):

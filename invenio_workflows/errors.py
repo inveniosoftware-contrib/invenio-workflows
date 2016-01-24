@@ -17,12 +17,31 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-from workflow.errors import with_str, HaltProcessing
+"""Custom exceptions for invenio-workflows."""
+
+from __future__ import absolute_import, print_function
+
+from workflow.errors import HaltProcessing, with_str
+
+
+class WorkflowsError(Exception):
+    """Base exception for invenio-workflows."""
+
+
+class WorkflowsMissingData(WorkflowsError):
+    """No data available for workflow."""
+
+
+class WorkflowsMissingObject(WorkflowsError):
+    """Requested object not found."""
 
 
 @with_str(('message', ('action', 'payload')))
-class WaitProcessing(HaltProcessing):  # Used to be WorkflowHalt
+class WaitProcessing(HaltProcessing, WorkflowsError):
+    """Custom WaitProcessing handling."""
+
     def __init__(self, message="", action=None, payload=None):
+        """Add required parameters to WaitProcessing."""
         super(WaitProcessing, self).__init__(
             message=message,
             action=action,
@@ -31,7 +50,7 @@ class WaitProcessing(HaltProcessing):  # Used to be WorkflowHalt
 
 
 @with_str(('message', ('worker_name', 'payload')))
-class WorkflowWorkerError(Exception):
+class WorkflowWorkerError(WorkflowsError):
     """Raised when there is a problem with workflow workers."""
 
     def __init__(self, message, worker_name="No Name Given", payload=None):

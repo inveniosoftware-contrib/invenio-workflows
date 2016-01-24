@@ -7,7 +7,7 @@ Invenio-Workflows v0.1.2 was released on October 2, 2015.
 About
 -----
 
-Invenio module for running determined set of tasks.
+Invenio module for running persistent workflows.
 
 *This is an experimental development preview release.*
 
