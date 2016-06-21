@@ -26,12 +26,12 @@
 
 from __future__ import absolute_import, print_function
 
+from .api import WorkflowObject
 from .ext import InvenioWorkflows
 from .tasks import start, resume, restart
-from .proxies import workflows
+from .proxies import workflows, workflow_object_class
 from .engine import WorkflowEngine
 from .models import (
-    WorkflowObject,
     Workflow,
     ObjectStatus,
 )
@@ -39,5 +39,5 @@ from .version import __version__
 
 
 __all__ = ('__version__', 'InvenioWorkflows',
-           'start', 'resume', 'ObjectStatus', 'WorkflowEngine',
-           'workflows', 'WorkflowObject', 'Workflow')
+           'start', 'resume', 'restart', 'ObjectStatus', 'WorkflowEngine',
+           'workflow_object_class', 'workflows', 'WorkflowObject', 'Workflow')

@@ -25,10 +25,11 @@ from uuid import uuid1
 
 from invenio_db import db
 
-from invenio_workflows import Workflow, WorkflowObject, start
+from invenio_workflows import Workflow, WorkflowObject
+from invenio_workflows.models import WorkflowObjectModel
 
 
-def test_db(app):
+def test_db(app, demo_workflow):
     assert 'workflows_object' in db.metadata.tables
     assert 'workflows_workflow' in db.metadata.tables
 
@@ -36,8 +37,7 @@ def test_db(app):
         workflow = Workflow(name='demo_workflow', uuid=uuid1(),
                             id_user=0)
         workflow.save()
-        workflow_object = WorkflowObject(workflow=workflow)
-        workflow_object.save()
+        workflow_object = WorkflowObjectModel(workflow=workflow)
         db.session.commit()
 
         bwo_id = workflow_object.id
@@ -47,20 +47,19 @@ def test_db(app):
         # assert workflow_object is deleted
         assert not (
             db.session.query(
-                WorkflowObject.query.filter(
-                    WorkflowObject.id == bwo_id).exists()).scalar())
+                WorkflowObjectModel.query.filter(
+                    WorkflowObjectModel.id == bwo_id).exists()).scalar())
 
         workflow = Workflow(name='demo_workflow', uuid=uuid1(),
                             id_user=0)
         workflow.save()
         w_uuid = workflow.uuid
-        workflow_object = WorkflowObject(workflow=workflow)
-        workflow_object.save()
+        workflow_object = WorkflowObjectModel(workflow=workflow)
         db.session.commit()
 
         # delete workflow_object
-        WorkflowObject.query.filter(
-            WorkflowObject.id == workflow_object.id
+        WorkflowObjectModel.query.filter(
+            WorkflowObjectModel.id == workflow_object.id
         ).delete()
         db.session.commit()
 
@@ -75,20 +74,32 @@ def test_execution_with_predefined_object(app, demo_workflow):
     """Test predefined object creation."""
 
     with app.app_context():
-        obj = WorkflowObject.create_object()
-        obj.data = 22
-        obj.save()
+        obj = WorkflowObject.create({"x": 22})
         db.session.commit()
 
+        ident = obj.id
+
+        obj = WorkflowObject.get(ident)
         obj.start_workflow("demo_workflow")
 
-        assert obj.data == 40
+        obj = WorkflowObject.get(ident)
+        assert obj.data == {"x": 40}
 
-        obj = WorkflowObject.create_object()
-        obj.data = 22
+        obj = WorkflowObject.create({"x": 22})
+        db.session.commit()
+
+        ident = obj.id
+
+        obj.start_workflow("demo_workflow", delayed=True)
+        obj = WorkflowObject.get(ident)
+        assert obj.data == {"x": 40}
+
+        # Check that attributes can be changed
+        obj.status = obj.known_statuses.RUNNING
+        obj.data_type = "bar"
         obj.save()
         db.session.commit()
 
-        obj.start_workflow("demo_workflow", delayed=True)
-
-        assert obj.data == 40
+        obj = WorkflowObject.get(ident)
+        assert obj.status == obj.known_statuses.RUNNING
+        assert obj.data_type == "bar"

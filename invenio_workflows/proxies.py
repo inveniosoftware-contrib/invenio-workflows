@@ -26,4 +26,8 @@ workflows = LocalProxy(
     lambda: current_app.extensions['invenio-workflows'].workflows
 )
 
-__all__ = ('workflows',)
+workflow_object_class = LocalProxy(
+    lambda: current_app.extensions['invenio-workflows'].workflow_object_class
+)
+
+__all__ = ('workflows', 'workflow_object_class')

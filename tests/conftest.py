@@ -51,6 +51,7 @@ def app(request):
         CELERY_RESULT_BACKEND="cache",
         SECRET_KEY="CHANGE_ME",
         SECURITY_PASSWORD_SALT="CHANGE_ME_ALSO",
+        SQLALCHEMY_TRACK_MODIFICATIONS=True,
         SQLALCHEMY_DATABASE_URI=os.environ.get(
             'SQLALCHEMY_DATABASE_URI', 'sqlite:///test.db'),
         TESTING=True,
@@ -74,17 +75,40 @@ def app(request):
 
 @pytest.fixture
 def demo_workflow(app):
-    from demo_package.workflows.demo_workflow import demo_workflow
+    def add(obj, eng):
+        obj.data["x"] += 20
+
+    def reduce(obj, eng):
+        obj.data["x"] -= 2
+
+    class DemoTest(object):
+        workflow = [add, reduce]
+
     app.extensions['invenio-workflows'].register_workflow(
-        'demo_workflow', demo_workflow
+        'demo_workflow', DemoTest
     )
-    # FIXME: Unknown why this is needed in only this case
-    # app.extensions['flask-celeryext']\
-    #    .celery.flask_app.extensions['invenio-workflows']\
-    #    .register_workflow(
-    #    'demo_workflow', demo_workflow
-    # )
-    return demo_workflow
+    return DemoTest
+
+
+@pytest.fixture
+def demo_halt_workflow(app):
+    def add(obj, eng):
+        obj.data["x"] += 20
+
+    def reduce(obj, eng):
+        obj.data["x"] -= 2
+
+    def halt_condition(obj, eng):
+        if obj.data["x"] < 10:
+            eng.halt()
+
+    class DemoTest(object):
+        workflow = [add, halt_condition, reduce]
+
+    app.extensions['invenio-workflows'].register_workflow(
+        'demo_halt_workflow', DemoTest
+    )
+    return DemoTest
 
 
 @pytest.fixture
@@ -107,10 +131,14 @@ def restart_workflow(app):
         return eng.halt("Test", action="foo")
 
     def add(obj, eng):
-        obj.data += 10
+        if obj.data.get("title"):
+            obj.data["title"] = {"value": "bar"}
+        else:
+            obj.data["title"] = "foo"
 
     def add_extra(obj, eng):
         obj.extra_data["test"] = "test"
+        obj.data["title"]["source"] = "TEST"
 
     class RestartTest(object):
         workflow = [add, halt_engine_action, add_extra]
@@ -127,7 +155,7 @@ def error_workflow(app):
         raise ZeroDivisionError
 
     def add(obj, eng):
-        obj.data += 10
+        obj.data["foo"] = "bar"
 
     def add_extra(obj, eng):
         obj.extra_data["test"] = "test"

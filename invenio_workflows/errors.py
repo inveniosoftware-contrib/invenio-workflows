@@ -28,6 +28,10 @@ class WorkflowsError(Exception):
     """Base exception for invenio-workflows."""
 
 
+class WorkflowsMissingModel(WorkflowsError):
+    """Model missing for invenio-workflows API."""
+
+
 class WorkflowsMissingData(WorkflowsError):
     """No data available for workflow."""
 

@@ -57,14 +57,14 @@ def start(workflow_name, data=None, object_id=None, **kwargs):
 
     :return: UUID of the workflow engine that ran the workflow.
     """
-    from .models import WorkflowObject
+    from .proxies import workflow_object_class
     from .worker_engine import run_worker
 
     if data is None and object_id is None:
         raise WorkflowsMissingData("No data or object_id passed to task.ß")
 
     if object_id is not None:
-        obj = WorkflowObject.query.get(object_id)
+        obj = workflow_object_class.get(object_id)
         if not obj:
             raise WorkflowsMissingObject(
                 "Cannot find object: {0}".format(object_id)

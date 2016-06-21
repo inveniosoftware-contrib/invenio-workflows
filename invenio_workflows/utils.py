@@ -19,7 +19,9 @@
 
 """Various utility functions for use across the workflows module."""
 
-from six import text_type
+from six import text_type, string_types
+
+from werkzeug import import_string
 
 
 def get_task_history(last_task):
@@ -79,3 +81,12 @@ def get_workflow_info(func_list):
         else:
             funcs.append(get_func_info(item))
     return funcs
+
+
+def obj_or_import_string(value, default=None):
+    """Import string or return object."""
+    if isinstance(value, string_types):
+        return import_string(value)
+    elif value:
+        return value
+    return default

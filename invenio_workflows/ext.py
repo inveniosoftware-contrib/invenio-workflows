@@ -28,6 +28,10 @@ from __future__ import absolute_import, print_function
 
 import pkg_resources
 
+from werkzeug.utils import cached_property
+
+from .utils import obj_or_import_string
+
 
 class _WorkflowState(object):
     """State of registered workflows."""
@@ -38,6 +42,12 @@ class _WorkflowState(object):
         self.workflows = {}
         if entry_point_group:
             self.load_entry_point_group(entry_point_group)
+
+    @cached_property
+    def workflow_object_class(self):
+        return obj_or_import_string(
+            self.app.config.get('WORKFLOWS_OBJECT_CLASS')
+        )
 
     def register_workflow(self, name, workflow):
         """Register an workflow to be showed in the workflows list."""
@@ -62,6 +72,10 @@ class InvenioWorkflows(object):
                  entry_point_group='invenio_workflows.workflows',
                  **kwargs):
         """Flask application initialization."""
+        app.config.setdefault(
+            "WORKFLOWS_OBJECT_CLASS",
+            "invenio_workflows.api.WorkflowObject"
+        )
         state = _WorkflowState(
             app, entry_point_group=entry_point_group, **kwargs
         )

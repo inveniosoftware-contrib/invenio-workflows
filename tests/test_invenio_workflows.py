@@ -28,7 +28,7 @@
 from __future__ import absolute_import, print_function
 
 import pytest
-from demo_package.workflows.demo_workflow import demo_workflow
+
 from flask import Flask
 from invenio_db import db
 from workflow.engine_db import WorkflowStatus
@@ -48,10 +48,19 @@ def test_version():
 
 def test_init():
     """Test extension initialization."""
+    def add(obj, eng):
+        obj.data["x"] += 20
+
+    def reduce(obj, eng):
+        obj.data["x"] -= 2
+
+    class DemoTest(object):
+        workflow = [add, reduce]
+
     app = Flask('testapp')
     ext = InvenioWorkflows(app)
     assert 'invenio-workflows' in app.extensions
-    ext.register_workflow('test_workflow', demo_workflow)
+    ext.register_workflow('test_workflow', DemoTest)
     assert 'test_workflow' in app.extensions['invenio-workflows'].workflows
 
     app = Flask('testapp')
@@ -72,7 +81,7 @@ def test_halt(app, halt_workflow, halt_workflow_conditional):
         eng_uuid = start('halttest', data)
 
         eng = WorkflowEngine.from_uuid(eng_uuid)
-        obj = list(eng.objects)[0]
+        obj = eng.processed_objects[0]
 
         assert obj.known_statuses.WAITING == obj.status
         assert WorkflowStatus.HALTED == eng.status
@@ -80,13 +89,13 @@ def test_halt(app, halt_workflow, halt_workflow_conditional):
         obj_id = obj.id
         obj.continue_workflow()
 
-        obj = WorkflowObject.query.get(obj_id)
+        obj = WorkflowObject.get(obj_id)
         assert obj.known_statuses.COMPLETED == obj.status
 
         # Check conditional workflows and pass data not as a list (to check).
         eng_uuid = start('halttestcond', data[0])
         eng = WorkflowEngine.from_uuid(eng_uuid)
-        obj = list(eng.objects)[0]
+        obj = eng.processed_objects[0]
 
         assert obj.known_statuses.WAITING == obj.status
         assert WorkflowStatus.HALTED == eng.status
@@ -94,7 +103,7 @@ def test_halt(app, halt_workflow, halt_workflow_conditional):
         obj_id = obj.id
         obj.continue_workflow()
 
-        obj = WorkflowObject.query.get(obj_id)
+        obj = WorkflowObject.get(obj_id)
         assert obj.known_statuses.COMPLETED == obj.status
 
 
@@ -103,35 +112,50 @@ def test_restart(app, restart_workflow):
     assert 'restarttest' in app.extensions['invenio-workflows'].workflows
 
     with app.app_context():
-        data = 0
+        data = {}
 
         eng_uuid = start('restarttest', data)
 
         eng = WorkflowEngine.from_uuid(eng_uuid)
-        obj = list(eng.objects)[0]
+        obj = eng.processed_objects[0]
 
         assert obj.known_statuses.HALTED == obj.status
         assert WorkflowStatus.HALTED == eng.status
-        assert obj.data == 10
+        assert obj.data == {"title": "foo"}
+        assert obj.get_action() == "foo"
+        assert obj.get_action_message() == "Test"
 
+        # Restart shall have no effect (still halted)
         new_eng_uuid = restart(eng_uuid)
 
         assert new_eng_uuid == eng_uuid
 
         eng = WorkflowEngine.from_uuid(eng_uuid)
-        obj = list(eng.objects)[0]
+        obj = eng.processed_objects[0]
 
         assert obj.known_statuses.HALTED == obj.status
         assert WorkflowStatus.HALTED == eng.status
-        assert obj.data == 20
+        assert obj.data == {"title": {"value": "bar"}}
+        assert obj.get_action() == "foo"
+
+        obj.remove_action()
+        assert obj.get_action() is None
 
         obj_id = obj.id
 
+        # Now it should resume the next task
         resume(obj_id)
 
-        obj = WorkflowObject.query.get(obj_id)
-        assert obj.extra_data.get('test') == 'test'
+        obj = WorkflowObject.get(obj_id)
         assert obj.known_statuses.COMPLETED == obj.status
+        assert obj.extra_data.get('test') == 'test'
+        assert obj.data.get('title').get('source') == 'TEST'
+
+        # We restart the object again
+        restart(obj.workflow.uuid, data=obj)
+        assert obj.known_statuses.HALTED == obj.status
+        assert WorkflowStatus.HALTED == eng.status
+        assert obj.data == {"title": {"value": "bar"}}
 
 
 def test_errors(app, error_workflow):
@@ -148,16 +172,14 @@ def test_errors(app, error_workflow):
         with pytest.raises(WorkflowsMissingObject):
             start('errortest', object_id=-1)
 
-        obj = WorkflowObject.create_object()
-        obj.data = 0
-        obj.save()
+        obj = WorkflowObject.create({"id": 0})
         db.session.commit()
 
         obj_id = obj.id
         with pytest.raises(ZeroDivisionError):
             start('errortest', object_id=obj_id)
 
-        obj = WorkflowObject.query.get(obj_id)
+        obj = WorkflowObject.get(obj_id)
 
         assert obj.known_statuses.ERROR == obj.status
-        assert obj.data == 10
+        assert obj.data == {"id": 0, "foo": "bar"}

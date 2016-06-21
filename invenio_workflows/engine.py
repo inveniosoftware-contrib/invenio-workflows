@@ -23,38 +23,43 @@ from __future__ import absolute_import
 
 import traceback
 
+from datetime import datetime
 from uuid import uuid1 as new_uuid
 
 from flask import current_app
 from invenio_db import db
+from sqlalchemy.orm.attributes import flag_modified
 from workflow.engine import ActionMapper, Break, Continue, ProcessingFactory, \
     TransitionActions
-from workflow.engine_db import DbWorkflowEngine, WorkflowStatus
+from workflow.engine import GenericWorkflowEngine
+from workflow.engine_db import WorkflowStatus
 from workflow.errors import WorkflowDefinitionError
-from workflow.utils import staticproperty
+from workflow.utils import staticproperty, classproperty
 
-from .errors import WaitProcessing
-from .models import ObjectStatus, Workflow, WorkflowObject
+from .proxies import workflow_object_class
+from .errors import WaitProcessing, WorkflowsMissingModel
+from .models import ObjectStatus, Workflow, WorkflowObjectModel
 from .utils import get_task_history
 
 
-class WorkflowEngine(DbWorkflowEngine):
+class WorkflowEngine(GenericWorkflowEngine):
     """Special engine for Invenio."""
 
-    def __init__(self, db_obj=None, name=None, id_user=None, **extra_data):
+    def __init__(self, model=None, name=None, id_user=None, **extra_data):
         """Special handling of instantiation of engine."""
         # Super's __init__ clears extra_data, which we override to be
-        # db_obj.extra_data. We work around this by temporarily storing it
+        # model.extra_data. We work around this by temporarily storing it
         # elsewhere.
-        if not db_obj:
-            db_obj = Workflow(
+        if not model:
+            model = Workflow(
                 name=name,
                 id_user=id_user,
                 uuid=new_uuid()
             )
-            db_obj.save(WorkflowStatus.NEW)
-        super(WorkflowEngine, self).__init__(db_obj)
-        self.set_workflow_by_name(self.db_obj.name)
+            model.save(WorkflowStatus.NEW)
+        self.model = model
+        super(WorkflowEngine, self).__init__()
+        self.set_workflow_by_name(self.model.name)
 
     @classmethod
     def with_name(cls, name, id_user=0, **extra_data):
@@ -78,15 +83,15 @@ class WorkflowEngine(DbWorkflowEngine):
         :param uuid: pass a uuid to an existing workflow.
         :type uuid: str
         """
-        db_obj = Workflow.query.get(uuid)
-        if db_obj is None:
+        model = Workflow.query.get(uuid)
+        if model is None:
             raise LookupError(
                 "No workflow with UUID {} was found".format(uuid)
             )
-        instance = cls(db_obj=db_obj, **extra_data)
-        instance.objects = WorkflowObject.query.filter(
-            WorkflowObject.id_workflow == uuid,
-            WorkflowObject.id_parent == None,  # noqa
+        instance = cls(model=model, **extra_data)
+        instance.objects = WorkflowObjectModel.query.filter(
+            WorkflowObjectModel.id_workflow == uuid,
+            WorkflowObjectModel.id_parent == None,  # noqa
         ).all()
         return instance
 
@@ -95,10 +100,19 @@ class WorkflowEngine(DbWorkflowEngine):
         """Return SQLAlchemy db."""
         return db
 
+    @property
+    def processed_objects(self):
+        """Return SQLAlchemy db."""
+        return [workflow_object_class(obj) for obj in self.objects]
+
     @staticproperty
     def object_status():  # pylint: disable=no-method-argument
         """Return ObjectStatus type."""
         return ObjectStatus
+
+    @classproperty
+    def known_statuses(cls):
+        return WorkflowStatus
 
     @staticproperty
     def processing_factory():  # pylint: disable=no-method-argument
@@ -108,12 +122,60 @@ class WorkflowEngine(DbWorkflowEngine):
     @property
     def uuid(self):
         """Return the uuid."""
-        return self.db_obj.uuid
+        return self.model.uuid
+
+    @property
+    def name(self):
+        """Return the name."""
+        return self.model.name
+
+    @property
+    def status(self):
+        """Return the status."""
+        return self.model.status
 
     @property
     def id_user(self):
         """Return the user id."""
-        return self.db_obj.id_user
+        return self.model.id_user
+
+    @property
+    def database_objects(self):
+        """Return the objects associated with this workflow."""
+        return self.model.objects
+
+    @property
+    def final_objects(self):
+        """Return the objects associated with this workflow."""
+        return [obj for obj in self.database_objects
+                if obj.status in [obj.known_statuses.COMPLETED]]
+
+    @property
+    def halted_objects(self):
+        """Return the objects associated with this workflow."""
+        return [obj for obj in self.database_objects
+                if obj.status in [obj.known_statuses.HALTED]]
+
+    @property
+    def running_objects(self):
+        """Return the objects associated with this workflow."""
+        return [obj for obj in self.database_objects
+                if obj.status in [obj.known_statuses.RUNNING]]
+
+    def save(self, status=None):
+        """Save object to persistent storage."""
+        if self.model is None:
+            raise WorkflowsMissingModel()
+
+        with db.session.begin_nested():
+            self.model.modified = datetime.now()
+            if status is not None:
+                self.model.status = status
+
+            if self.model.extra_data is None:
+                self.model.extra_data = dict()
+            flag_modified(self.model, 'extra_data')
+            db.session.merge(self.model)
 
     def wait(self, msg=""):
         """Halt the workflow (stop also any parent `wfe`).
@@ -147,7 +209,7 @@ class WorkflowEngine(DbWorkflowEngine):
             'continue_next': 'next',
             'restart_prev': 'prev',
         }
-        self.state.callback_pos = workflow_object.get_current_task() or [0]
+        self.state.callback_pos = workflow_object.callback_pos or [0]
         self.restart(task=translate[restart_point], obj='first',
                      objects=[workflow_object], stop_on_halt=stop_on_halt)
 
@@ -158,11 +220,11 @@ class WorkflowEngine(DbWorkflowEngine):
     @property
     def has_completed(self):
         """Return True if workflow is fully completed."""
-        objects_in_db = WorkflowObject.query.filter(
-            WorkflowObject.id_workflow == self.uuid,
-            WorkflowObject.id_parent == None,  # noqa
-        ).filter(WorkflowObject.status.in_([
-            WorkflowObject.known_statuses.COMPLETED
+        objects_in_db = WorkflowObjectModel.query.filter(
+            WorkflowObjectModel.id_workflow == self.uuid,
+            WorkflowObjectModel.id_parent == None,  # noqa
+        ).filter(WorkflowObjectModel.status.in_([
+            workflow_object_class.known_statuses.COMPLETED
         ])).count()
         return objects_in_db == len(list(self.objects))
 
@@ -191,22 +253,13 @@ class WorkflowEngine(DbWorkflowEngine):
 
     def reset_extra_data(self):
         """Reset extra data to defaults."""
-        self.db_obj.extra_data = {}
+        self.model.extra_data = {}
 
     def __repr__(self):
         """Allow to represent the WorkflowEngine."""
         return "<WorkflowEngine (name={0}, status={1})>".format(
             self.name, self.status
         )
-
-    def __str__(self):
-        """Allow to print the WorkflowEngine."""
-        return """-------------------------------
-WorkflowEngine
--------------------------------
-    %s
--------------------------------
-""" % (self.db_obj.__str__(),)
 
 
 class InvenioActionMapper(ActionMapper):
@@ -261,7 +314,7 @@ class InvenioProcessingFactory(ProcessingFactory):
             .after_object(eng, objects, obj)
         obj.save(
             status=obj.known_statuses.COMPLETED,
-            id_workflow=eng.db_obj.uuid
+            id_workflow=eng.model.uuid
         )
         db.session.commit()
 

@@ -103,6 +103,9 @@ setup(
         'invenio_base.apps': [
             'invenio_workflows = invenio_workflows:InvenioWorkflows',
         ],
+        'invenio_base.api_apps': [
+            'invenio_workflows = invenio_workflows:InvenioWorkflows',
+        ],
         'invenio_celery.tasks': [
             'invenio_workflows = invenio_workflows.tasks',
         ],

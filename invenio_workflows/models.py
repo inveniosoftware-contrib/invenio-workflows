@@ -19,27 +19,18 @@
 
 """Models for workflow engine and objects."""
 
-import base64
 import uuid
-from collections import Iterable, namedtuple
+
 from datetime import datetime
 
-from flask import current_app
 from invenio_db import db
-from six import callable, iteritems
-from six.moves import cPickle
-from sqlalchemy import desc
+
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy_utils.types import ChoiceType, UUIDType, JSONType
 from workflow.engine_db import EnumLabel, WorkflowStatus
-from workflow.errors import WorkflowAPIError
 from workflow.utils import staticproperty
-
-from .proxies import workflows
-from .signals import workflow_object_after_save, workflow_object_before_save
-from .utils import get_func_info
 
 
 class ObjectStatus(EnumLabel):
@@ -63,22 +54,6 @@ class ObjectStatus(EnumLabel):
         }
 
 
-class CallbackPosType(db.PickleType):
-
-    def process_bind_param(self, value, dialect):
-        if not isinstance(value, Iterable):
-            raise TypeError("Task counter must be an iterable!")
-        return self.type_impl.process_bind_param(value, dialect)  # noqa
-
-
-def _decode(data):
-    return cPickle.loads(base64.b64decode(data))
-
-
-def _encode(data):
-    return base64.b64encode(cPickle.dumps(data))
-
-
 class Workflow(db.Model):
     """Represents a workflow instance storing the state of the workflow."""
 
@@ -98,11 +73,11 @@ class Workflow(db.Model):
             'postgresql',
         ),
         default=lambda: dict(),
-        nullable=True
+        nullable=False
     )
     status = db.Column(ChoiceType(WorkflowStatus, impl=db.Integer()),
                        default=WorkflowStatus.NEW, nullable=False)
-    objects = db.relationship("WorkflowObject",
+    objects = db.relationship("WorkflowObjectModel",
                               backref='workflows_workflow',
                               cascade="all, delete-orphan")
 
@@ -125,13 +100,13 @@ class Workflow(db.Model):
             self.modified = datetime.now()
             if status is not None:
                 self.status = status
+            if self.extra_data is None:
+                self.extra_data = dict()
+            flag_modified(self, 'extra_data')
             db.session.merge(self)
 
 
-Mapping = namedtuple('Mapping', ['db_name', 'default_x_data'])
-
-
-class WorkflowObject(db.Model):
+class WorkflowObjectModel(db.Model):
     """Data model for wrapping data being run in the workflows.
 
     Main object being passed around in the workflows module
@@ -141,7 +116,7 @@ class WorkflowObject(db.Model):
 
     .. code-block:: python
 
-        obj = WorkflowObject.create_object()
+        obj = WorkflowObject.create(data={"title": "Of the foo and bar"})
 
 
     WorkflowObject provides some handy functions such as:
@@ -173,12 +148,23 @@ class WorkflowObject(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    # Our internal data column. Default is encoded dict.
-    _data = db.Column(db.LargeBinary, nullable=False,
-                      default=_encode({}))
+    data = db.Column(
+        JSONType().with_variant(
+            postgresql.JSON(none_as_null=True),
+            'postgresql',
+        ),
+        default={},
+        nullable=False
+    )
 
-    _extra_data = db.Column(db.LargeBinary, nullable=False,
-                            default=_encode({}))
+    extra_data = db.Column(
+        JSONType().with_variant(
+            postgresql.JSON(none_as_null=True),
+            'postgresql',
+        ),
+        default={},
+        nullable=False
+    )
 
     _id_workflow = db.Column(UUIDType,
                              db.ForeignKey("workflows_workflow.uuid",
@@ -193,7 +179,7 @@ class WorkflowObject(db.Model):
                                                     ondelete='CASCADE'),
                           default=None)
 
-    child_objects = db.relationship("WorkflowObject",
+    child_objects = db.relationship("WorkflowObjectModel",
                                     remote_side=[id_parent])
 
     created = db.Column(db.DateTime, default=datetime.now, nullable=False)
@@ -206,11 +192,14 @@ class WorkflowObject(db.Model):
 
     id_user = db.Column(db.Integer, default=0, nullable=False)
 
-    # Set blank comparator to update PickleType at all times
-    # Ref: https://bitbucket.org/zzzeek/sqlalchemy/
-    # issues/2994/pickletype-gets-not-updated-in-database-in
-    callback_pos = db.Column(CallbackPosType(comparator=lambda *a: False),
-                             default=[])
+    callback_pos = db.Column(
+        JSONType().with_variant(
+            postgresql.JSON(none_as_null=True),
+            'postgresql',
+        ),
+        default=lambda: list(),
+        nullable=True
+    )
 
     workflow = db.relationship(
         Workflow, foreign_keys=[_id_workflow], remote_side=Workflow.uuid,
@@ -227,96 +216,6 @@ class WorkflowObject(db.Model):
         """Set id_workflow."""
         self._id_workflow = str(value) if value else None
 
-    @staticproperty
-    def known_statuses():  # pylint: disable=no-method-argument
-        """Get type for object status."""
-        return ObjectStatus
-
-    def __getattribute__(self, name):
-        """Return `data` and `extra_data` user-facing storage representations.
-
-        Initialize the one requested with default content if it is not yet
-        loaded.
-
-        Calling :py:func:`.save` is necessary to reflect any changes made to
-        these objects in the model.
-        """
-        data_getter = {
-            'data': Mapping('_data', _encode({})),
-            'extra_data': Mapping('_extra_data', _encode({})),
-        }
-        if name in data_getter and name not in self.__dict__:
-            mapping = data_getter[name]
-            if getattr(self, mapping.db_name) is None:
-                # Object has not yet been intialized
-                stored_data = mapping.default_x_data
-            else:
-                stored_data = getattr(self, mapping.db_name)
-            setattr(self, name, _decode(stored_data))
-        return object.__getattribute__(self, name)
-
-    def __dir__(self):
-        """Restore auto-completion for names found via `__getattribute__`."""
-        dir_ = dir(type(self)) + list(self.__dict__.keys())
-        dir_.extend(('data', 'extra_data',))
-        return sorted(dir_)
-
-    @property
-    def log(self):
-        """Access logger object for this instance."""
-        return current_app.logger
-
-    # Deprecated
-    def get_data(self):
-        """Get data saved in the object."""
-        return self.data
-
-    # Deprecated
-    def set_data(self, value):
-        """Save data to the object."""
-        self.data = value
-
-    # Deprecated
-    def get_extra_data(self):
-        """Get extra data saved to the object."""
-        return self.extra_data
-
-    # Deprecated
-    def set_extra_data(self, value):
-        """Save extra data to the object.
-
-        :param value: what you want to replace extra_data with.
-        :type value: dict
-        """
-        self.extra_data = value
-
-    def get_workflow_name(self):
-        """Return the workflow name for this object."""
-        try:
-            if self.id_workflow:
-                return Workflow.query.get(self.id_workflow).name
-        except AttributeError:
-            # Workflow non-existent
-            pass
-        return
-
-    def get_formatted_data(self, **kwargs):
-        """Get the formatted representation for this object."""
-        try:
-            name = self.get_workflow_name()
-            if not name:
-                return "Did not find any way to format data."
-            workflow_definition = workflows[name]
-            formatted_data = workflow_definition.formatter(
-                self,
-                **kwargs
-            )
-        except (KeyError, AttributeError) as err:
-            # Somehow the workflow or formatter does not exist
-            formatted_data = "Error formatting record: {0}".format(err)
-            current_app.logger.exception(err)
-        return formatted_data
-
     def __repr__(self):
         """Represent a WorkflowObject."""
         return "<WorkflowObject(id = %s, id_workflow = %s, " \
@@ -324,171 +223,5 @@ class WorkflowObject(db.Model):
                % (str(self.id), str(self.id_workflow), str(self.status),
                   str(self.id_parent), str(self.created))
 
-    def __eq__(self, other):
-        """Enable equal operators on WorkflowObjects."""
-        if isinstance(other, WorkflowObject):
-            if self._data == other._data and \
-                    self._extra_data == other._extra_data and \
-                    self.id_workflow == other.id_workflow and \
-                    self.status == other.status and \
-                    self.id_parent == other.id_parent and \
-                    isinstance(self.created, datetime) and \
-                    isinstance(self.modified, datetime):
-                return True
-            else:
-                return False
-        return NotImplemented
 
-    def __ne__(self, other):
-        """Enable equal operators on WorkflowObjects."""
-        return not self.__eq__(other)
-
-    def set_action(self, action, message):
-        """Set the action to be taken for this object.
-
-        Assign an special "action" to this object to be taken
-        in consideration in Holding Pen. The widget is referred to
-        by a string with the filename minus extension.
-
-        A message is also needed to tell the user the action
-        required in a textual way.
-
-        :param action: name of the action to add (i.e. "approval")
-        :type action: string
-
-        :param message: message to show to the user
-        :type message: string
-        """
-        self.extra_data["_action"] = action
-        self.extra_data["_message"] = message
-
-    def get_action(self):
-        """Retrieve the currently assigned action, if any.
-
-        :return: name of action assigned as string, or None
-        """
-        return self.extra_data.get("_action")
-
-    def get_action_message(self):
-        """Retrieve the currently assigned widget, if any."""
-        return self.extra_data.get("_message")
-
-    def remove_action(self):
-        """Remove the currently assigned action."""
-        extra_data = self.extra_data
-        extra_data["_action"] = None
-        extra_data["_message"] = ""
-        if "_widget" in extra_data:
-            del extra_data["_widget"]
-        self.set_extra_data(extra_data)
-
-    def start_workflow(self, workflow_name, delayed=False, **kwargs):
-        """Run the workflow specified on the object.
-
-        :param workflow_name: name of workflow to run
-        :type workflow_name: str
-
-        :param delayed: should the workflow run asynchronously?
-        :type delayed: bool
-
-        :return: UUID of WorkflowEngine (or AsyncResult).
-        """
-        from .tasks import start
-
-        if delayed:
-            self.save()
-            db.session.commit()
-            return start.delay(workflow_name, object_id=self.id, **kwargs)
-        else:
-            return start(workflow_name, data=[self], **kwargs)
-
-    def continue_workflow(self, start_point="continue_next",
-                          delayed=False, **kwargs):
-        """Continue the workflow for this object.
-
-        The parameter `start_point` allows you to specify the point of where
-        the workflow shall continue:
-
-        * restart_prev: will restart from the previous task
-
-        * continue_next: will continue to the next task
-
-        * restart_task: will restart the current task
-
-        :param start_point: where should the workflow start from?
-        :type start_point: str
-
-        :param delayed: should the workflow run asynchronously?
-        :type delayed: bool
-
-        :return: UUID of WorkflowEngine (or AsyncResult).
-        """
-        from .tasks import resume
-
-        self.save()
-        if not self.id_workflow:
-            raise WorkflowAPIError("No workflow associated with object: %r"
-                                   % (repr(self),))
-        if delayed:
-            db.session.commit()
-            return resume.delay(self.id, start_point, **kwargs)
-        else:
-            return resume(self.id, start_point, **kwargs)
-
-    # Deprecated
-    def get_current_task(self):
-        """Return the current task from the workflow engine for this object."""
-        return self.callback_pos
-
-    def get_current_task_info(self):
-        """Return dictionary of current task function info for this object."""
-        name = self.get_workflow_name()
-        if not name:
-            return
-
-        current_task = workflows[name].workflow
-        for step in self.callback_pos:
-            current_task = current_task[step]
-            if callable(current_task):
-                return get_func_info(current_task)
-
-    def copy(self, other):
-        """Copy data and metadata except id and id_workflow."""
-        for attr in ('status', 'id_parent', 'created',
-                     'modified', 'status', 'data_type'):
-            setattr(self, attr, getattr(other, attr))
-        setattr(self, 'data', other.data)
-        setattr(self, 'extra_data', other.extra_data)
-        return self
-
-    def save(self, status=None, callback_pos=None, id_workflow=None):
-        """Save object to persistent storage."""
-        with db.session.begin_nested():
-            workflow_object_before_save.send(self)
-
-            if callback_pos is not None:
-                self.callback_pos = callback_pos  # Used by admins
-            self.log.debug("Current callback pos: %s" % (self.callback_pos,))
-            self._data = _encode(self.data)
-            self._extra_data = _encode(self.extra_data)
-
-            self.modified = datetime.now()
-            if status is not None:
-                self.status = status
-            if id_workflow is not None:
-                self.id_workflow = id_workflow
-            db.session.merge(self)
-            if self.id is not None:
-                self.log.debug("Saved object: %s" % (self.id or "new",))
-        workflow_object_after_save.send(self)
-
-    @classmethod
-    def create_object(cls, **kwargs):
-        """Create a new Workflow Object with given content."""
-        obj = WorkflowObject(**kwargs)
-        with db.session.begin_nested():
-            db.session.add(obj)
-        return obj
-
-
-__all__ = ('Workflow', 'WorkflowObject')
+__all__ = ('Workflow', 'WorkflowObjectModel')

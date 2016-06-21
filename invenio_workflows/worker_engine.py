@@ -18,12 +18,12 @@
 
 """Mediator between API and workers responsible for running the workflows."""
 
-from flask import current_app
 from invenio_db import db
-from workflow.errors import WorkflowObjectStatusError
 
+from .api import WorkflowObject
 from .engine import WorkflowEngine
-from .models import Workflow, WorkflowObject
+from .models import Workflow
+from .proxies import workflow_object_class
 
 
 def run_worker(wname, data, **kwargs):
@@ -75,11 +75,12 @@ def restart_worker(uuid, **kwargs):
     engine = WorkflowEngine.from_uuid(uuid=uuid, **kwargs)
 
     if "data" not in kwargs:
-        objects = WorkflowObject.query.filter(
-            WorkflowObject.id_workflow == uuid,
-        ).all()
+        objects = workflow_object_class.query(id_workflow=uuid)
     else:
-        objects = get_workflow_object_instances(kwargs["data"], engine)
+        data = kwargs.pop("data")
+        if not isinstance(data, (list, tuple)):
+            data = [data]
+        objects = get_workflow_object_instances(data, engine)
 
     db.session.commit()
     engine.process(objects, **kwargs)
@@ -109,7 +110,7 @@ def continue_worker(oid, restart_point="continue_next", **kwargs):
     if 'stop_on_halt' not in kwargs:
         kwargs['stop_on_halt'] = False
 
-    workflow_object = WorkflowObject.query.get(oid)
+    workflow_object = workflow_object_class.get(oid)
     workflow = Workflow.query.get(workflow_object.id_workflow)
 
     engine = WorkflowEngine(workflow, **kwargs)
@@ -149,7 +150,9 @@ def get_workflow_object_instances(data, engine):
     data_type = engine.get_default_data_type()
 
     for data_object in data:
-        if isinstance(data_object, WorkflowObject):
+        if isinstance(
+            data_object, workflow_object_class._get_current_object()
+        ):
             data_object.data_type = data_type
 
             if data_object.id:
@@ -190,10 +193,9 @@ def create_data_object_from_data(data_object, engine, data_type):
     """
     # Data is not already a WorkflowObject, we first
     # create an initial object for each data object.
-    current_obj = WorkflowObject.create_object(
+    return workflow_object_class.create(
+        data=data_object,
         id_workflow=engine.uuid,
-        status=WorkflowObject.known_statuses.INITIAL,
-        data_type=data_type
+        status=workflow_object_class.known_statuses.INITIAL,
+        data_type=data_type,
     )
-    current_obj.data = data_object
-    return current_obj

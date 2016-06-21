@@ -35,7 +35,7 @@ def test_delayed_execution(app, halt_workflow):
         async_result = start.delay('halttest', data)
 
         eng = WorkflowEngine.from_uuid(async_result.get())
-        obj = list(eng.objects)[0]
+        obj = eng.processed_objects[0]
 
         assert obj.known_statuses.WAITING == obj.status
         assert WorkflowStatus.HALTED == eng.status
@@ -43,7 +43,7 @@ def test_delayed_execution(app, halt_workflow):
         obj_id = obj.id
         obj.continue_workflow(delayed=True)
 
-        obj = WorkflowObject.query.get(obj_id)
+        obj = WorkflowObject.get(obj_id)
         assert obj.known_statuses.COMPLETED == obj.status
 
 
@@ -55,7 +55,7 @@ def test_delayed_execution_api(app, halt_workflow):
         async_result = start.delay('halttest', data)
 
         eng = WorkflowEngine.from_uuid(async_result.get())
-        obj = list(eng.objects)[0]
+        obj = eng.processed_objects[0]
 
         assert obj.known_statuses.WAITING == obj.status
         assert WorkflowStatus.HALTED == eng.status
@@ -63,5 +63,5 @@ def test_delayed_execution_api(app, halt_workflow):
         obj_id = obj.id
         resume.delay(obj_id)
 
-        obj = WorkflowObject.query.get(obj_id)
+        obj = WorkflowObject.get(obj_id)
         assert obj.known_statuses.COMPLETED == obj.status
