@@ -29,9 +29,10 @@ from invenio_db import db
 from six import callable, iteritems
 from six.moves import cPickle
 from sqlalchemy import desc
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy_utils.types import ChoiceType, UUIDType
+from sqlalchemy_utils.types import ChoiceType, UUIDType, JSONType
 from workflow.engine_db import EnumLabel, WorkflowStatus
 from workflow.errors import WorkflowAPIError
 from workflow.utils import staticproperty
@@ -91,42 +92,19 @@ class Workflow(db.Model):
     modified = db.Column(db.DateTime, default=datetime.now,
                          onupdate=datetime.now, nullable=False)
     id_user = db.Column(db.Integer, default=0, nullable=False)
-    _extra_data = db.Column(db.LargeBinary,
-                            nullable=False,
-                            default=_encode({}))
+    extra_data = db.Column(
+        JSONType().with_variant(
+            postgresql.JSON(none_as_null=True),
+            'postgresql',
+        ),
+        default=lambda: dict(),
+        nullable=True
+    )
     status = db.Column(ChoiceType(WorkflowStatus, impl=db.Integer()),
                        default=WorkflowStatus.NEW, nullable=False)
     objects = db.relationship("WorkflowObject",
                               backref='workflows_workflow',
                               cascade="all, delete-orphan")
-
-    def __getattribute__(self, name):
-        """Return `extra_data` user-facing storage representations.
-
-        Initialize the one requested with default content if it is not yet
-        loaded.
-
-        Calling :py:func:`.save` is necessary to reflect any changes made to
-        these objects in the model.
-        """
-        data_getter = {
-            'extra_data': Mapping('_extra_data', _encode({})),
-        }
-        if name in data_getter and name not in self.__dict__:
-            mapping = data_getter[name]
-            if getattr(self, mapping.db_name) is None:
-                # Object has not yet been intialized
-                stored_data = mapping.default_x_data
-            else:
-                stored_data = getattr(self, mapping.db_name)
-            setattr(self, name, _decode(stored_data))
-        return object.__getattribute__(self, name)
-
-    def __dir__(self):
-        """Restore auto-completion for names found via `__getattribute__`."""
-        dir_ = dir(type(self)) + list(self.__dict__.keys())
-        dir_.extend(('extra_data',))
-        return sorted(dir_)
 
     def __repr__(self):
         """Represent a workflow object."""
@@ -136,91 +114,10 @@ class Workflow(db.Model):
                 str(self.id_user), str(self.status))
 
     @classmethod
-    def get(cls, *criteria, **filters):
-        """Wrapper to get a specified object.
-
-        A wrapper for the filter and filter_by functions of sqlalchemy.
-        Define a dict with which columns should be filtered by which values.
-
-        .. code-block:: python
-
-            Workflow.get(uuid=uuid)
-            Workflow.get(Workflow.uuid != uuid)
-
-        The function supports also "hybrid" arguments.
-
-        .. code-block:: python
-
-            Workflow.get(Workflow.module_name != 'i_hate_this_module',
-                         user_id=user_id)
-
-        See also SQLAlchemy BaseQuery's filter and filter_by documentation.
-        """
-        return cls.query.filter(*criteria).filter_by(**filters)
-
-    @classmethod
-    def get_status(cls, uuid=None):
-        """Return the status of the workflow."""
-        return cls.get(Workflow.uuid == uuid).one().status
-
-    @classmethod
-    def get_most_recent(cls, *criteria, **filters):
-        """Return the most recently modified workflow."""
-        most_recent = cls.get(*criteria, **filters). \
-            order_by(desc(Workflow.modified)).first()
-        if most_recent is None:
-            raise NoResultFound
-        else:
-            return most_recent
-
-    @classmethod
-    def get_objects(cls, uuid=None):
-        """Return the objects of the workflow."""
-        return cls.get(Workflow.uuid == uuid).one().objects
-
-    # Deprecated
-    def get_extra_data(self, user_id=0, uuid=None, key=None, getter=None):
-        """Get the extra_data for the object.
-
-        Returns a JSON of the column extra_data or
-        if any of the other arguments are defined,
-        a specific value.
-
-        You can define either the key or the getter function.
-
-        :param key: the key to access the desirable value
-        :param getter: callable that takes a dict as param and returns a value
-        """
-        if key:
-            return self.extra_data[key]
-        elif callable(getter):
-            return getter(self.extra_data)
-        elif not key:
-            return self.extra_data
-
-    # Deprecated
-    def set_extra_data(self, user_id=0, uuid=None,
-                       key=None, value=None, setter=None):
-        """Replace extra_data.
-
-        Modifies the JSON of the column extra_data or
-        if any of the other arguments are defined, a specific value.
-        You can define either the key, value or the setter function.
-
-        :param key: the key to access the desirable value
-        :param value: the new value
-        :param setter: a callable that takes a dict as param and modifies it
-        """
-        if key is not None and value is not None:
-            self.extra_data[key] = value
-        elif callable(setter):
-            setter(self.extra_data)
-
-    @classmethod
     def delete(cls, uuid=None):
         """Delete a workflow."""
         uuid = uuid or cls.uuid
-        db.session.delete(cls.get(Workflow.uuid == uuid).first())
+        db.session.delete(Workflow.query.get(uuid))
 
     def save(self, status=None):
         """Save object to persistent storage."""
@@ -228,7 +125,6 @@ class Workflow(db.Model):
             self.modified = datetime.now()
             if status is not None:
                 self.status = status
-            self._extra_data = _encode(self.extra_data)
             db.session.merge(self)
 
 

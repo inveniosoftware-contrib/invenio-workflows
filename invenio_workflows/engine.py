@@ -22,7 +22,7 @@
 from __future__ import absolute_import
 
 import traceback
-from copy import deepcopy
+
 from uuid import uuid1 as new_uuid
 
 from flask import current_app
@@ -39,13 +39,7 @@ from .utils import get_task_history
 
 
 class WorkflowEngine(DbWorkflowEngine):
-    """Special engine for Invenio.
-
-    The reason why base64 is used throughout this class is due to a bug in
-    CPython pickle streams which sometimes contain non-ASCII characters.
-    Because of this it is impossible to correctly use json on such data without
-    base64 encoding it first.
-    """
+    """Special engine for Invenio."""
 
     def __init__(self, db_obj=None, name=None, id_user=None, **extra_data):
         """Special handling of instantiation of engine."""
@@ -59,31 +53,8 @@ class WorkflowEngine(DbWorkflowEngine):
                 uuid=new_uuid()
             )
             db_obj.save(WorkflowStatus.NEW)
-        _extra_data = deepcopy(db_obj.extra_data)
         super(WorkflowEngine, self).__init__(db_obj)
-        self.extra_data = _extra_data
-
-        self.extra_data.update(extra_data)
         self.set_workflow_by_name(self.db_obj.name)
-
-    def __dir__(self):
-        """Restore auto-completion for names found via `__getattr__`."""
-        dir_ = dir(type(self)) + list(self.__dict__.keys())
-        dir_.extend(('extra_data',))
-        return sorted(dir_)
-
-    def __getattribute__(self, name):
-        """Return `extra_data` user-facing storage representations."""
-        if name == 'extra_data':
-            return self.db_obj.extra_data
-        else:
-            return object.__getattribute__(self, name)
-
-    def __setattr__(self, name, val):
-        """Set `extra_data` user-facing storage representations."""
-        if name == 'extra_data':
-            self.db_obj.extra_data = val
-        self.__dict__[name] = val
 
     @classmethod
     def with_name(cls, name, id_user=0, **extra_data):
@@ -107,7 +78,7 @@ class WorkflowEngine(DbWorkflowEngine):
         :param uuid: pass a uuid to an existing workflow.
         :type uuid: str
         """
-        db_obj = Workflow.get(Workflow.uuid == uuid).first()
+        db_obj = Workflow.query.get(uuid)
         if db_obj is None:
             raise LookupError(
                 "No workflow with UUID {} was found".format(uuid)
