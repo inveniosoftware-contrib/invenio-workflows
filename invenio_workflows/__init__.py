@@ -26,16 +26,15 @@
 
 from __future__ import absolute_import, print_function
 
-from .api import WorkflowObject
-from .ext import InvenioWorkflows
-from .tasks import start, resume, restart
-from .proxies import workflows, workflow_object_class
-from .engine import WorkflowEngine
+from .ext import InvenioWorkflows  # noqa: F401
+from .tasks import start, resume, restart  # noqa: F401
+from .proxies import workflows  # noqa: F401
+from .engine import WorkflowEngine  # noqa: F401
 from .models import (
     Workflow,
     ObjectStatus,
-)
-from .version import __version__
+)  # noqa: F401
+from .version import __version__  # noqa: F401
 
 
 __all__ = ('__version__', 'InvenioWorkflows',

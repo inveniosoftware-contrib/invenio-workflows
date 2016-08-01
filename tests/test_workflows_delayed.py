@@ -21,7 +21,6 @@
 
 from __future__ import absolute_import
 
-from invenio_db import db
 from workflow.engine_db import WorkflowStatus
 
 from invenio_workflows import WorkflowEngine, WorkflowObject, resume, start
