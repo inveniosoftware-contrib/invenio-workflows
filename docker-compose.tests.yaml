@@ -1,0 +1,129 @@
+# -*- coding: utf-8 -*-
+#
+# This file is part of Invenio.
+# Copyright (C) 2016 CERN.
+#
+# Invenio is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# Invenio is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Invenio; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+
+version: '2'
+
+services:
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=dbpass123
+      - POSTGRES_USER=workflows
+      - PGDATA=/var/lib/postgresql/data/pgdata
+
+  mysql:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=dbpass123
+      - MYSQL_PASSWORD=dbpass123
+      - MYSQL_USER=workflows
+      - MYSQL_DATABASE=workflows
+
+  test-py27:
+    build:
+      context: .
+      dockerfile: tests/Dockerfile.py27
+    command: tox -r
+    working_dir: /code
+    volumes:
+      - .:/code
+    environment:
+      - TOXENV=pep8,docs,doctests,docstyle,packaging,py27
+  test-py27postgres:
+    extends:
+      service: test-py27
+    depends_on:
+      - postgres
+    environment:
+      - SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://workflows:dbpass123@postgres:5432/workflows
+      - TOXENV=py27postgres
+  test-py27mysql:
+    extends:
+      service: test-py27
+    depends_on:
+      - mysql
+    environment:
+      - SQLALCHEMY_DATABASE_URI=mysql+pymysql://workflows:dbpass123@mysql:3306/workflows
+      - TOXENV=py27mysql
+
+  test-py33:
+    extends: test-py27
+    build:
+      context: .
+      dockerfile: tests/Dockerfile.py33
+    environment:
+      - TOXENV=py33
+  test-py33mysql:
+    extends: test-py33
+    depends_on:
+      - mysql
+    environment:
+      - SQLALCHEMY_DATABASE_URI=mysql+pymysql://workflows:dbpass123@mysql:3306/workflows
+      - TOXENV=py33mysql
+  test-py33postgres:
+    extends: test-py33
+    depends_on:
+      - postgres
+    environment:
+      - SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://workflows:dbpass123@postgres:5432/workflows
+      - TOXENV=py33postgres
+
+  test-py34:
+    extends: test-py27
+    build:
+      context: .
+      dockerfile: tests/Dockerfile.py34
+    environment:
+      - TOXENV=py34
+  test-py34mysql:
+    extends: test-py34
+    depends_on:
+      - mysql
+    environment:
+      - SQLALCHEMY_DATABASE_URI=mysql+pymysql://workflows:dbpass123@mysql:3306/workflows
+      - TOXENV=py34mysql
+  test-py34postgres:
+    extends: test-py34
+    depends_on:
+      - postgres
+    environment:
+      - SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://workflows:dbpass123@postgres:5432/workflows
+      - TOXENV=py34postgres
+
+  test-py35:
+    extends: test-py27
+    build:
+      context: .
+      dockerfile: tests/Dockerfile.py35
+    environment:
+      - TOXENV=py35
+  test-py35mysql:
+    extends: test-py35
+    depends_on:
+      - mysql
+    environment:
+      - SQLALCHEMY_DATABASE_URI=mysql+pymysql://workflows:dbpass123@mysql:3306/workflows
+      - TOXENV=py35mysql
+  test-py35postgres:
+    extends: test-py35
+    depends_on:
+      - postgres
+    environment:
+      - SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://workflows:dbpass123@postgres:5432/workflows
+      - TOXENV=py35postgres

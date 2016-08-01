@@ -36,46 +36,61 @@ cache:
   - pip
 
 services:
-  - mysql
-  - postgresql
-
+  - docker
 
 env:
-  - REQUIREMENTS=lowest SQLALCHEMY_DATABASE_URI="sqlite:///test.db"
-  - REQUIREMENTS=lowest SQLALCHEMY_DATABASE_URI="mysql+pymysql://travis@localhost:3306/invenio"
-  - REQUIREMENTS=lowest SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/invenio"
-  - REQUIREMENTS=release SQLALCHEMY_DATABASE_URI="sqlite:///test.db"
-  - REQUIREMENTS=release SQLALCHEMY_DATABASE_URI="mysql+pymysql://travis@localhost:3306/invenio"
-  - REQUIREMENTS=release SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/invenio"
-  - REQUIREMENTS=devel SQLALCHEMY_DATABASE_URI="sqlite:///test.db"
-  - REQUIREMENTS=devel SQLALCHEMY_DATABASE_URI="mysql+pymysql://travis@localhost:3306/invenio"
-  - REQUIREMENTS=devel SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://postgres@localhost:5432/invenio"
+  global:
+    - DOCKER_VERSION=1.10.3-0~trusty
+    - DOCKER_COMPOSE_VERSION=1.6.2
+  matrix:
+    - SUITE=py27
+      # this ^ suite includes the pep8, packaging, docs, doctests, docstyle
+      # and py27 tox environment runs
+    - SUITE=py27mysql
+    - SUITE=py27postgres
 
-python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
-  - "3.5"
+    - SUITE=py33
+    - SUITE=py33mysql
+    - SUITE=py33postgres
+
+    - SUITE=py34
+    - SUITE=py34mysql
+    - SUITE=py34postgres
+
+    - SUITE=py35
+    - SUITE=py35mysql
+    - SUITE=py35postgres
 
 before_install:
-  - "travis_retry pip install --upgrade pip setuptools py"
-  - "travis_retry pip install twine wheel coveralls requirements-builder pymysql psycopg2"
-  # FIXME: temporary until updated workflow is merged
-  - "travis_retry pip install git+https://github.com/inspirehep/workflow.git#egg=workflow==2.0.0.dev20160223"
-  - "requirements-builder -e all --level=min setup.py > .travis-lowest-requirements.txt"
-  - "requirements-builder -e all --level=pypi setup.py > .travis-release-requirements.txt"
-  - "requirements-builder -e all --level=dev --req requirements-devel.txt setup.py > .travis-devel-requirements.txt"
-  - "mysql -e 'CREATE DATABASE IF NOT EXISTS invenio;' -uroot"
-  - "psql -c 'CREATE DATABASE invenio;' -U postgres"
+  - "travis_retry pip install --upgrade pip setuptools coveralls"
+# FIXME: span also all the requirement levels in the matrix
+#  - "requirements-builder -e all --level=min setup.py > .travis-lowest-requirements.txt"
+#  - "requirements-builder -e all --level=pypi setup.py > .travis-release-requirements.txt"
+#  - "requirements-builder -e all --level=dev --req requirements-devel.txt setup.py > .travis-devel-requirements.txt"
+  # List available docker versions.
+  - apt-cache madison docker-engine
+  # Update Docker to 1.10.1 https://graysonkoonce.com/managing-docker-and-docker-compose-versions-on-travis-ci/.
+  - sudo apt-get -o Dpkg::Options::="--force-confnew" install -y "docker-engine=${DOCKER_VERSION}"
+  # Add docker-compose at the version specified in ENV.
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
 
 install:
-  - "travis_retry pip install -r .travis-${REQUIREMENTS}-requirements.txt"
-  - "travis_retry pip install -e .[all]"
+  - "travis_retry docker-compose -f docker-compose.tests.yaml pull"
+  - "travis_retry docker-compose -f docker-compose.tests.yaml build test-$SUITE"
 
 script:
-  - "./run-tests.sh"
+  - docker-compose -f docker-compose.tests.yaml run --rm "test-$SUITE"
+
+after_script:
+  - "docker-compose -f docker-compose.tests.yml kill"
+  - "docker-compose -f docker-compose.tests.yml rm -f"
 
 after_success:
+  # Coverage report contains Docker paths. We replace them, so that we can run Coveralls.
+  - sed -i 's@\"/code/@'"\"$(pwd)/"'@g' .coverage
   - coveralls
 
 deploy:
