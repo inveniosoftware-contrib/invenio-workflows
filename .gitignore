@@ -12,6 +12,7 @@ dist
 .cache
 .coverage
 .tox
+tests/test.db
 
 # doc
 docs/_build
