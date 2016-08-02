@@ -112,6 +112,7 @@ class WorkflowEngine(GenericWorkflowEngine):
 
     @classproperty
     def known_statuses(cls):
+        """Return WorkflowStatus type."""
         return WorkflowStatus
 
     @staticproperty

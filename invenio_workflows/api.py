@@ -45,8 +45,10 @@ from .models import ObjectStatus, WorkflowObjectModel
 
 
 class WorkflowObject(object):
+    """Main entity for the workflow module."""
 
     def __init__(self, model=None):
+        """Simple constructor, does not take any action."""
         self.model = model
 
     @staticproperty
@@ -75,11 +77,20 @@ class WorkflowObject(object):
         return current_app.logger
 
     def __getattr__(self, name):
+        """Wrapper on attribute access.
+
+        To allow accessing the columns from the model as python attributes.
+        """
         if name in self.known_columns:
             return getattr(self.model, name)
         return object.__getattribute__(self, name)
 
     def __setattr__(self, name, value):
+        """Wrapper on attribute set.
+
+        To allow setting the rows of the model as python if they were python
+        attributes.
+        """
         if name in self.known_columns:
             return setattr(self.model, name, value)
         return object.__setattr__(self, name, value)
