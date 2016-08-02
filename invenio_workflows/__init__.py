@@ -26,6 +26,7 @@
 
 from __future__ import absolute_import, print_function
 
+from .api import WorkflowObject  # noqa: F401
 from .ext import InvenioWorkflows  # noqa: F401
 from .tasks import start, resume, restart  # noqa: F401
 from .proxies import workflows  # noqa: F401
