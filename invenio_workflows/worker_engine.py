@@ -18,10 +18,8 @@
 
 """Mediator between API and workers responsible for running the workflows."""
 
-from flask import current_app
 from invenio_db import db
 
-from .api import WorkflowObject
 from .engine import WorkflowEngine
 from .models import Workflow
 from .proxies import workflow_object_class

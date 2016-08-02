@@ -53,7 +53,7 @@ Engine
 Models
 ------
 .. automodule:: invenio_workflows.models
-   :members: ObjectStatus, WorkflowObject
+   :members: ObjectStatus
    :undoc-members:
 
 
