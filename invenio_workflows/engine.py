@@ -417,10 +417,20 @@ class InvenioTransitionAction(TransitionActions):
 
     @staticmethod
     def StopProcessing(obj, eng, callbacks, exc_info):
-        """Gracefully stop the execution of the engine."""
-        msg = "Processing was stopped for object: {0}".format(obj.id)
-        eng.log.debug(msg)
-        raise Break
+        """Stop the engne and mark the workflow as completed"""
+        e = exc_info[1]
+        obj.save(status=eng.object_status.COMPLETED,
+                 id_workflow=eng.uuid)
+        eng.save(WorkflowStatus.COMPLETED)
+        obj.log.warning(
+            "Workflow '%s' stopped at task %s with message: %s",
+            eng.name, eng.current_taskname or "Unknown", e.message
+        )
+        db.session.commit()
+
+        super(InvenioTransitionAction, InvenioTransitionAction).StopProcessing(
+            obj, eng, callbacks, exc_info
+        )
 
     @staticmethod
     def SkipToken(obj, eng, callbacks, exc_info):
