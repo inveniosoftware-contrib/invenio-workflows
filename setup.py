@@ -54,37 +54,9 @@ test_requirements = [
     'invenio-testing>=0.1.0',
 ]
 
-
-class PyTest(TestCommand):
-
-    """PyTest Test."""
-
-    user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
-
-    def initialize_options(self):
-        """Init pytest."""
-        TestCommand.initialize_options(self)
-        self.pytest_args = []
-        try:
-            from ConfigParser import ConfigParser
-        except ImportError:
-            from configparser import ConfigParser
-        config = ConfigParser()
-        config.read('pytest.ini')
-        self.pytest_args = config.get('pytest', 'addopts').split(' ')
-
-    def finalize_options(self):
-        """Finalize pytest."""
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        """Run tests."""
-        # import here, cause outside the eggs aren't loaded
-        import pytest
-        errno = pytest.main(self.pytest_args)
-        sys.exit(errno)
+setup_requires = [
+    'pytest-runner>=2.6.2',
+]
 
 # Get the version string. Cannot be done with import!
 g = {}
@@ -133,5 +105,4 @@ setup(
         'Development Status :: 1 - Planning',
     ],
     tests_require=test_requirements,
-    cmdclass={'test': PyTest},
 )
