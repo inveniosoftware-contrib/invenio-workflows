@@ -417,7 +417,7 @@ class InvenioTransitionAction(TransitionActions):
 
     @staticmethod
     def StopProcessing(obj, eng, callbacks, exc_info):
-        """Stop the engne and mark the workflow as completed"""
+        """Stop the engne and mark the workflow as completed."""
         e = exc_info[1]
         obj.save(status=eng.object_status.COMPLETED,
                  id_workflow=eng.uuid)
