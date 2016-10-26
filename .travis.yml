@@ -40,22 +40,14 @@ services:
 
 env:
   global:
-    - DOCKER_VERSION=1.10.3-0~trusty
-    - DOCKER_COMPOSE_VERSION=1.6.2
+    - DOCKER_VERSION=1.12.0-0~trusty
+    - DOCKER_COMPOSE_VERSION=1.8.0
   matrix:
     - SUITE=py27
       # this ^ suite includes the pep8, packaging, docs, doctests, docstyle
       # and py27 tox environment runs
     - SUITE=py27mysql
     - SUITE=py27postgres
-
-    - SUITE=py33
-    - SUITE=py33mysql
-    - SUITE=py33postgres
-
-    - SUITE=py34
-    - SUITE=py34mysql
-    - SUITE=py34postgres
 
     - SUITE=py35
     - SUITE=py35mysql
@@ -85,8 +77,8 @@ script:
   - docker-compose -f docker-compose.tests.yaml run --rm "test-$SUITE"
 
 after_script:
-  - "docker-compose -f docker-compose.tests.yml kill"
-  - "docker-compose -f docker-compose.tests.yml rm -f"
+  - "docker-compose -f docker-compose.tests.yaml kill"
+  - "docker-compose -f docker-compose.tests.yaml rm -f"
 
 after_success:
   # Coverage report contains Docker paths. We replace them, so that we can run Coveralls.
