@@ -24,8 +24,6 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 pydocstyle invenio_workflows && \
-# isort -rc -c -df **/*.py && \  irratic behaviour on travis
-check-manifest --ignore ".travis-*" && \
 sphinx-build -qnNW docs docs/_build/html && \
 python setup.py test && \
 sphinx-build -qnNW -b doctest docs docs/_build/doctest
