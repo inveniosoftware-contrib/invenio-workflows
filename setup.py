@@ -23,15 +23,12 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 """Invenio module for running workflows."""
-
-import os
-
 from setuptools import find_packages, setup
 
-readme = open('README.rst').read()
-history = open('CHANGES.rst').read()
 
-tests_require = [
+README = open('README.rst').read()
+
+TESTS_REQUIRE = [
     'check-manifest>=0.25',
     'coverage>=4.0',
     'isort>=4.2.2',
@@ -43,22 +40,24 @@ tests_require = [
     'pytest>=2.8.0',
 ]
 
-extras_require = {
+EXTRAS_REQUIRE = {
     'docs': [
         'Sphinx>=1.3',
     ],
-    'tests': tests_require,
+    'tests': TESTS_REQUIRE,
 }
 
-extras_require['all'] = []
-for name, reqs in extras_require.items():
-    extras_require['all'].extend(reqs)
+EXTRAS_REQUIRE['all'] = []
+for name, reqs in EXTRAS_REQUIRE.items():
+    EXTRAS_REQUIRE['all'].extend(reqs)
 
-setup_requires = [
+SETUP_REQUIRES = [
+    'autosemver>=0.1.9',
     'pytest-runner>=2.7.0',
 ]
 
-install_requires = [
+INSTALL_REQUIRES = [
+    'autosemver>=0.1.9',
     'Flask-CLI>=0.2.1',
     'flask-celeryext>=0.1.0',
     'blinker>=1.4',
@@ -69,25 +68,24 @@ install_requires = [
     # 'workflow>=2.0.0',
 ]
 
-packages = find_packages()
+PACKAGES = find_packages()
 
-# Get the version string. Cannot be done with import!
-g = {}
-with open(os.path.join('invenio_workflows', 'version.py'), 'rt') as fp:
-    exec(fp.read(), g)
-    version = g['__version__']
+
+URL = 'https://github.com/inveniosoftware/invenio-workflows'
+
 
 setup(
     name='invenio-workflows',
-    version=version,
+    autosemver=True,
     description=__doc__,
-    long_description=readme + '\n\n' + history,
+    long_description=README,
     keywords='invenio workflows state-machine persistent execution',
     license='GPLv2',
     author='CERN',
     author_email='info@inveniosoftware.org',
-    url='https://github.com/inveniosoftware/invenio-workflows',
-    packages=packages,
+    url=URL,
+    bugtracker_url=URL + '/issues/',
+    packages=PACKAGES,
     zip_safe=False,
     include_package_data=True,
     platforms='any',
@@ -105,10 +103,10 @@ setup(
             'invenio_workflows = invenio_workflows.models',
         ],
     },
-    extras_require=extras_require,
-    install_requires=install_requires,
-    setup_requires=setup_requires,
-    tests_require=tests_require,
+    extras_require=EXTRAS_REQUIRE,
+    install_requires=INSTALL_REQUIRES,
+    setup_requires=SETUP_REQUIRES,
+    tests_require=TESTS_REQUIRE,
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',

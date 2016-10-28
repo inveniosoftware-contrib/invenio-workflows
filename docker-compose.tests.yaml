@@ -44,7 +44,7 @@ services:
     volumes:
       - .:/code
     environment:
-      - TOXENV=pep8,docs,doctests,docstyle,packaging,py27
+      - TOXENV=pep8,docs,doctests,docstyle,py27
   test-py27postgres:
     extends:
       service: test-py27
@@ -61,50 +61,6 @@ services:
     environment:
       - SQLALCHEMY_DATABASE_URI=mysql+pymysql://workflows:dbpass123@mysql:3306/workflows
       - TOXENV=py27mysql
-
-  test-py33:
-    extends: test-py27
-    build:
-      context: .
-      dockerfile: tests/Dockerfile.py33
-    environment:
-      - TOXENV=py33
-  test-py33mysql:
-    extends: test-py33
-    depends_on:
-      - mysql
-    environment:
-      - SQLALCHEMY_DATABASE_URI=mysql+pymysql://workflows:dbpass123@mysql:3306/workflows
-      - TOXENV=py33mysql
-  test-py33postgres:
-    extends: test-py33
-    depends_on:
-      - postgres
-    environment:
-      - SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://workflows:dbpass123@postgres:5432/workflows
-      - TOXENV=py33postgres
-
-  test-py34:
-    extends: test-py27
-    build:
-      context: .
-      dockerfile: tests/Dockerfile.py34
-    environment:
-      - TOXENV=py34
-  test-py34mysql:
-    extends: test-py34
-    depends_on:
-      - mysql
-    environment:
-      - SQLALCHEMY_DATABASE_URI=mysql+pymysql://workflows:dbpass123@mysql:3306/workflows
-      - TOXENV=py34mysql
-  test-py34postgres:
-    extends: test-py34
-    depends_on:
-      - postgres
-    environment:
-      - SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://workflows:dbpass123@postgres:5432/workflows
-      - TOXENV=py34postgres
 
   test-py35:
     extends: test-py27

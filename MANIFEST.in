@@ -23,34 +23,22 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 # Check manifest will not automatically add these two files:
-include .dockerignore
-include .editorconfig
 include .tx/config
 
 # added by check_manifest.py
 include *.py
 include *.rst
 include *.txt
-include .editorconfig .dockerignore .travis.yml .kwalitee.yml
+include .editorconfig .dockerignore .travis.yml
 include LICENSE
-include pytest.ini
 include tox.ini
 include *.sh
-include *.txt
 include *.yaml
 
 recursive-include docs *.bat
 recursive-include docs *.py
 recursive-include docs *.rst
 recursive-include docs Makefile
-recursive-include invenio_workflows *.css
-recursive-include invenio_workflows *.json
-recursive-include invenio_workflows *.html
-recursive-include invenio_workflows *.js
-recursive-include invenio_workflows *.mustache
-recursive-include invenio_workflows *.mo
-recursive-include invenio_workflows *.po
-recursive-include invenio_workflows *.pot
 recursive-include invenio_workflows *.py
 recursive-include tests *.py
 recursive-include tests *.xml
