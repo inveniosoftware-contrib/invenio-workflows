@@ -1,6 +1,6 @@
 ..
     This file is part of Invenio.
-    Copyright (C) 2015 CERN.
+    Copyright (C) 2015, 2016 CERN.
 
     Invenio is free software; you can redistribute it
     and/or modify it under the terms of the GNU General Public License as
@@ -41,9 +41,7 @@
         :target: https://github.com/inveniosoftware/invenio-workflows/blob/master/LICENSE
 
 
-Invenio module for running determined set of tasks.
-
-*This is an experimental development preview release.*
+Invenio module for running persistent workflows.
 
 * Free software: GPLv2 license
-* Documentation: https://invenio-workflows.readthedocs.org.
+* Documentation: https://pythonhosted.org/invenio-workflows

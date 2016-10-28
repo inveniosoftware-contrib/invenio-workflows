@@ -22,13 +22,36 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-[aliases]
-test = pytest
 
-[build_sphinx]
-source-dir = docs/
-build-dir = docs/_build
-all_files = 1
+"""Minimal Flask application example for development.
 
-[bdist_wheel]
-universal = 1
+Run example development server:
+
+.. code-block:: console
+
+   $ cd examples
+   $ flask -a app.py --debug run
+"""
+
+from __future__ import absolute_import, print_function
+
+import os
+
+from flask import Flask
+from flask_cli import FlaskCLI
+from invenio_db import InvenioDB
+
+from invenio_workflows import InvenioWorkflows
+
+# Create Flask application
+app = Flask(__name__)
+FlaskCLI(app)
+InvenioDB(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+    'SQLALCHEMY_DATABASE_URI', 'sqlite:///test.db'
+)
+InvenioWorkflows(app)
+
+with app.app_context():
+    from invenio_db import db
+    db.create_all()

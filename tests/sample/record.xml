@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+    <responseDate>2013-04-03T13:56:49Z</responseDate>
+    <request from="2013-03-25" metadataPrefix="arXiv" set="physics:astro-ph" verb="ListRecords">http://export.arxiv.org/oai2</request>
+    <ListRecords>
+        <record>
+            <header>
+                <identifier>oai:arXiv.org:0801.3931</identifier>
+                <datestamp>2013-03-26</datestamp>
+                <setSpec>physics:astro-ph</setSpec>
+            </header>
+            <metadata>
+                <arXiv xmlns="http://arxiv.org/OAI/arXiv/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://arxiv.org/OAI/arXiv/ http://arxiv.org/OAI/arXiv.xsd">
+                    <id>0801.3931</id>
+                    <created>2008-01-25</created>
+                    <authors>
+                        <author>
+                            <keyname>Manos</keyname>
+                            <forenames>T.</forenames>
+                        </author>
+                        <author>
+                            <keyname>Athanassoula</keyname>
+                            <forenames>E.</forenames>
+                        </author>
+                    </authors>
+                    <title>Dynamical study of 2D and 3D barred galaxy models</title>
+                    <categories>astro-ph</categories>
+                    <comments>8 pages, 3 figures, to appear in the proceedings of the international
+                    conference &quot;Chaos in Astronomy&quot;, Athens, Greece (talk contribution)</comments>
+                    <journal-ref>Chaos in Astronomy Astrophysics and Space Science Proceedings
+                    2009, pp 115-122</journal-ref>
+                    <doi>10.1007/978-3-540-75826-6_11</doi>
+                    <abstract>We study the dynamics of 2D and 3D barred galaxy analytical models, focusing
+                    on the distinction between regular and chaotic orbits with the help of the
+                    Smaller ALigment Index (SALI), a very powerful tool for this kind of problems.
+                    We present briefly the method and we calculate the fraction of chaotic and
+                    regular orbits in several cases. In the 2D model, taking initial conditions on
+                    a Poincar\'{e} $(y,p_y)$ surface of section, we determine the fraction of
+                    regular and chaotic orbits. In the 3D model, choosing initial conditions on a
+                    cartesian grid in a region of the $(x, z, p_y)$ space, which in coordinate
+                    space covers the inner disc, we find how the fraction of regular orbits changes
+                    as a function of the Jacobi constant. Finally, we outline that regions near the
+                    $(x,y)$ plane are populated mainly by regular orbits. The same is true for
+                    regions that lie either near to the galactic center, or at larger relatively
+                    distances from it.
+                </abstract>
+                </arXiv>
+            </metadata>
+        </record>
+    </ListRecords>
+</OAI-PMH>

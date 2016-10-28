@@ -22,42 +22,50 @@
     as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 
-.. include:: ../README.rst
+.. automodule:: invenio_workflows
 
-User's Guide
-------------
+API Docs
+========
 
-This part of the documentation will show you how to get started in using
-Invenio-Workflows.
-
-.. toctree::
-   :maxdepth: 2
-
-   installation
-   usage
+Flask extension
+---------------
+.. automodule:: invenio_workflows.ext
+   :members:
+   :undoc-members:
 
 
-API Reference
--------------
+Tasks API
+---------
+.. automodule:: invenio_workflows.tasks
+   :members: start, resume, restart
+   :undoc-members:
+   :show-inheritance:
+.. autotask:: invenio_workflows.tasks.start
 
-If you are looking for information on a specific function, class or method,
-this part of the documentation is for you.
 
-.. toctree::
-   :maxdepth: 2
+Engine
+------
+.. automodule:: invenio_workflows.engine
+   :members: ObjectStatus, WorkflowStatus, WorkflowEngine, InvenioProcessingFactory, InvenioActionMapper, InvenioTransitionAction
+   :undoc-members:
 
-   api
 
-Additional Notes
-----------------
+Models
+------
+.. automodule:: invenio_workflows.models
+   :members: ObjectStatus
+   :undoc-members:
 
-Notes on how to contribute, legal information and changes are here for the
-interested.
 
-.. toctree::
-   :maxdepth: 1
+Errors
+------
+.. automodule:: invenio_workflows.errors
+   :members:
+   :undoc-members:
 
-   contributing
-   changes
-   license
-   authors
+Signals
+-------
+.. automodule:: invenio_workflows.signals
+   :members: workflow_finished, workflow_halted, workflow_started, workflow_error, workflow_object_before_save, workflow_object_after_save
+   :undoc-members:
+   :show-inheritance:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2013, 2014, 2015 CERN.
+# Copyright (C) 2013, 2014, 2015, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -21,56 +21,85 @@
 
 from __future__ import absolute_import
 
-from invenio_ext.sqlalchemy import db
+from uuid import uuid1
 
-from invenio_testing import InvenioTestCase
+from invenio_db import db
+
+from invenio_workflows import Workflow, WorkflowObject
+from invenio_workflows.models import WorkflowObjectModel
 
 
-class TestWorkflowModels(InvenioTestCase):
+def test_db(app, demo_workflow):
+    assert 'workflows_object' in db.metadata.tables
+    assert 'workflows_workflow' in db.metadata.tables
 
-    """Test meant for testing the models available."""
+    with app.app_context():
+        workflow = Workflow(name='demo_workflow', uuid=uuid1(),
+                            id_user=0)
+        workflow.save()
+        workflow_object = WorkflowObjectModel(workflow=workflow)
+        db.session.commit()
 
-    def setUp(self):
-        """Setup tests."""
-        from invenio_workflows.models import BibWorkflowObject, \
-            Workflow
-        from uuid import uuid1 as new_uuid
-
-        self.workflow = Workflow(name='demo_workflow', uuid=new_uuid(),
-                                 id_user=0, module_name="Unknown")
-        self.bibworkflowobject = BibWorkflowObject(workflow=self.workflow)
-
-        self.create_objects([self.workflow, self.bibworkflowobject])
-
-    def tearDown(self):
-        """Clean up tests."""
-        self.delete_objects([self.workflow, self.bibworkflowobject])
-
-    def test_deleting_workflow(self):
-        """Test deleting workflow."""
-        from invenio_workflows.models import BibWorkflowObject, \
-            Workflow
-        bwo_id = self.bibworkflowobject.id
-
+        bwo_id = workflow_object.id
         # delete workflow
-        Workflow.delete(self.workflow.uuid)
+        Workflow.delete(workflow.uuid)
 
-        # assert bibworkflowobject is deleted
-        self.assertFalse(
+        # assert workflow_object is deleted
+        assert not (
             db.session.query(
-                BibWorkflowObject.query.filter(
-                    BibWorkflowObject.id == bwo_id).exists()).scalar())
+                WorkflowObjectModel.query.filter(
+                    WorkflowObjectModel.id == bwo_id).exists()).scalar())
 
-    def test_deleting_bibworkflowobject(self):
-        """Test deleting workflowobject."""
-        from invenio_workflows.models import Workflow
-        w_uuid = self.workflow.uuid
+        workflow = Workflow(name='demo_workflow', uuid=uuid1(),
+                            id_user=0)
+        workflow.save()
+        w_uuid = workflow.uuid
+        workflow_object = WorkflowObjectModel(workflow=workflow)
+        db.session.commit()
 
-        # delete bibworkflowobject
-        self.bibworkflowobject.delete(self.bibworkflowobject.id)
+        # delete workflow_object
+        WorkflowObjectModel.query.filter(
+            WorkflowObjectModel.id == workflow_object.id
+        ).delete()
+        db.session.commit()
 
         # assert workflow is not deleted
-        self.assertTrue(
+        assert (
             db.session.query(
                 Workflow.query.filter(
                     Workflow.uuid == w_uuid).exists()).scalar())
+
+
+def test_execution_with_predefined_object(app, demo_workflow):
+    """Test predefined object creation."""
+
+    with app.app_context():
+        obj = WorkflowObject.create({"x": 22})
+        db.session.commit()
+
+        ident = obj.id
+
+        obj = WorkflowObject.get(ident)
+        obj.start_workflow("demo_workflow")
+
+        obj = WorkflowObject.get(ident)
+        assert obj.data == {"x": 40}
+
+        obj = WorkflowObject.create({"x": 22})
+        db.session.commit()
+
+        ident = obj.id
+
+        obj.start_workflow("demo_workflow", delayed=True)
+        obj = WorkflowObject.get(ident)
+        assert obj.data == {"x": 40}
+
+        # Check that attributes can be changed
+        obj.status = obj.known_statuses.RUNNING
+        obj.data_type = "bar"
+        obj.save()
+        db.session.commit()
+
+        obj = WorkflowObject.get(ident)
+        assert obj.status == obj.known_statuses.RUNNING
+        assert obj.data_type == "bar"
