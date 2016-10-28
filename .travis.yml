@@ -68,6 +68,10 @@ before_install:
   - curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
+  - pip install --upgrade pip setuptools
+  - pip install "autosemver>=0.1.9"
+  - autosemver . version
+  - autosemver . changelog
 
 install:
   - "travis_retry docker-compose -f docker-compose.tests.yaml pull"
@@ -84,6 +88,8 @@ after_success:
   # Coverage report contains Docker paths. We replace them, so that we can run Coveralls.
   - sed -i 's@\"/code/@'"\"$(pwd)/"'@g' .coverage
   - coveralls
+  - sudo git clean -fdx
+  - sudo rm -rf .cache .tox .eggs
 
 deploy:
   provider: pypi
