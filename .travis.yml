@@ -40,8 +40,8 @@ services:
 
 env:
   global:
-    - DOCKER_VERSION=1.12.0-0~trusty
-    - DOCKER_COMPOSE_VERSION=1.8.0
+    - DOCKER_VERSION=1.12.3-0~trusty
+    - DOCKER_COMPOSE_VERSION=1.9.0
   matrix:
     - SUITE=py27
       # this ^ suite includes the pep8, packaging, docs, doctests, docstyle
