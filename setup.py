@@ -52,12 +52,12 @@ for name, reqs in EXTRAS_REQUIRE.items():
     EXTRAS_REQUIRE['all'].extend(reqs)
 
 SETUP_REQUIRES = [
-    'autosemver>=0.1.9',
+    'autosemver~=0.2,>=0.2',
     'pytest-runner>=2.7.0',
 ]
 
 INSTALL_REQUIRES = [
-    'autosemver>=0.1.9',
+    'autosemver~=0.2,>=0.2',
     'Flask-CLI>=0.2.1',
     'flask-celeryext>=0.1.0',
     'blinker>=1.4',
@@ -76,7 +76,6 @@ URL = 'https://github.com/inveniosoftware/invenio-workflows'
 
 setup(
     name='invenio-workflows',
-    autosemver=True,
     description=__doc__,
     long_description=README,
     keywords='invenio workflows state-machine persistent execution',
@@ -84,7 +83,9 @@ setup(
     author='CERN',
     author_email='info@inveniosoftware.org',
     url=URL,
-    bugtracker_url=URL + '/issues/',
+    autosemver={
+        'bugtracker_url': URL + '/issues/',
+    },
     packages=PACKAGES,
     zip_safe=False,
     include_package_data=True,
