@@ -48,7 +48,7 @@ class WorkflowObject(object):
     """Main entity for the workflow module."""
 
     def __init__(self, model=None):
-        """Simple constructor, does not take any action."""
+        """Instantiate class."""
         self.model = model
 
     @staticproperty
@@ -77,7 +77,7 @@ class WorkflowObject(object):
         return current_app.logger
 
     def __getattr__(self, name):
-        """Wrapper on attribute access.
+        """Wrap attribute access.
 
         To allow accessing the columns from the model as python attributes.
         """
@@ -86,7 +86,7 @@ class WorkflowObject(object):
         return object.__getattribute__(self, name)
 
     def __setattr__(self, name, value):
-        """Wrapper on attribute set.
+        """Wrap attribute set.
 
         To allow setting the rows of the model as python if they were python
         attributes.
@@ -159,7 +159,7 @@ class WorkflowObject(object):
 
     @classmethod
     def query(cls, *criteria, **filters):
-        """Wrapper to get a specified object.
+        """Wrap sqlalchemy query methods.
 
         A wrapper for the filter and filter_by functions of sqlalchemy.
         Define a dict with which columns should be filtered by which values.

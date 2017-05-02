@@ -46,7 +46,7 @@ class WorkflowEngine(GenericWorkflowEngine):
     """Special engine for Invenio."""
 
     def __init__(self, model=None, name=None, id_user=None, **extra_data):
-        """Special handling of instantiation of engine."""
+        """Handle special case of instantiation of engine."""
         # Super's __init__ clears extra_data, which we override to be
         # model.extra_data. We work around this by temporarily storing it
         # elsewhere.
@@ -268,12 +268,12 @@ class InvenioActionMapper(ActionMapper):
 
     @staticmethod
     def before_each_callback(eng, callback_func, obj):
-        """Action to take before every WF callback."""
+        """Take action before every WF callback."""
         eng.log.info("Executing callback %s" % (repr(callback_func),))
 
     @staticmethod
     def after_each_callback(eng, callback_func, obj):
-        """Action to take after every WF callback."""
+        """Take action after every WF callback."""
         obj.callback_pos = eng.state.callback_pos
         obj.extra_data["_last_task_name"] = callback_func.__name__
         task_history = get_task_history(callback_func)
@@ -298,7 +298,7 @@ class InvenioProcessingFactory(ProcessingFactory):
 
     @staticmethod
     def before_object(eng, objects, obj):
-        """Action to take before the processing of an object begins."""
+        """Take action before the processing of an object begins."""
         super(InvenioProcessingFactory, InvenioProcessingFactory)\
             .before_object(
             eng, objects, obj
@@ -309,7 +309,7 @@ class InvenioProcessingFactory(ProcessingFactory):
 
     @staticmethod
     def after_object(eng, objects, obj):
-        """Action to take once the proccessing of an object completes."""
+        """Take action once the proccessing of an object completes."""
         # We save each object once it is fully run through
         super(InvenioProcessingFactory, InvenioProcessingFactory)\
             .after_object(eng, objects, obj)
@@ -321,7 +321,7 @@ class InvenioProcessingFactory(ProcessingFactory):
 
     @staticmethod
     def before_processing(eng, objects):
-        """Executed before processing the workflow."""
+        """Execute before processing the workflow."""
         super(InvenioProcessingFactory, InvenioProcessingFactory)\
             .before_processing(eng, objects)
         eng.save(WorkflowStatus.RUNNING)
@@ -329,7 +329,7 @@ class InvenioProcessingFactory(ProcessingFactory):
 
     @staticmethod
     def after_processing(eng, objects):
-        """Action after process to update status."""
+        """Process to update status."""
         super(InvenioProcessingFactory, InvenioProcessingFactory)\
             .after_processing(eng, objects)
         if eng.has_completed:
@@ -434,14 +434,14 @@ class InvenioTransitionAction(TransitionActions):
 
     @staticmethod
     def SkipToken(obj, eng, callbacks, exc_info):
-        """Action to take when SkipToken is raised."""
+        """Take action when SkipToken is raised."""
         msg = "Skipped running this object: {0}".format(obj.id)
         eng.log.debug(msg)
         raise Continue
 
     @staticmethod
     def AbortProcessing(obj, eng, callbacks, exc_info):
-        """Action to take when AbortProcessing is raised."""
+        """Take action when AbortProcessing is raised."""
         msg = "Processing was aborted for object: {0}".format(obj.id)
         eng.log.debug(msg)
         raise Break

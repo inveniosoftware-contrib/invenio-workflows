@@ -153,3 +153,14 @@ def test_equality(app, halt_workflow):
         obj3 = WorkflowObject.create({"x": 22})
         obj4 = WorkflowObject.create({"x": 2})
         assert obj4 != obj3
+
+
+def test_create_with_default_extra_data(app):
+    """Test that the extra data dictionary is not shared between
+    workflow instances."""
+    with app.app_context():
+        obj1 = WorkflowObject.create({"x": 22})
+        obj1.extra_data['foo'] = 'bar'
+
+        obj2 = WorkflowObject.create({"x": 22})
+        assert obj2.extra_data is not obj1.extra_data

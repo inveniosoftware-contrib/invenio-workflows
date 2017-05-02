@@ -29,6 +29,7 @@ from setuptools import find_packages, setup
 README = open('README.rst').read()
 
 TESTS_REQUIRE = [
+    'celery<4.0',
     'check-manifest>=0.25',
     'coverage>=4.0',
     'isort>=4.2.2',

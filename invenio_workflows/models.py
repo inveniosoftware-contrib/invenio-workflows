@@ -153,7 +153,7 @@ class WorkflowObjectModel(db.Model):
             postgresql.JSON(none_as_null=True),
             'postgresql',
         ),
-        default={},
+        default=lambda: dict(),
         nullable=False
     )
 
@@ -162,7 +162,7 @@ class WorkflowObjectModel(db.Model):
             postgresql.JSON(none_as_null=True),
             'postgresql',
         ),
-        default={},
+        default=lambda: dict(),
         nullable=False
     )
 
