@@ -50,7 +50,7 @@ def start(workflow_name, data=None, object_id=None, **kwargs):
 
     :param data: the workflow name to run. Ex: "my_workflow" (optional if
         ``object_id`` provided).
-    :type data: list
+    :type data: tuple
 
     :param object_id: id of ``WorkflowObject`` to run (optional).
     :type object_id: int
