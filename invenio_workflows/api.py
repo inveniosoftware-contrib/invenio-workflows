@@ -209,16 +209,60 @@ class WorkflowObject(object):
         if self.model:
             return self.model.__repr__()
 
+    def _has_same_extra_data(self, wflw2):
+
+        def _are_same_task(task1, task2):
+            task1 = dict(task1)
+            task1.pop('time')
+            task2 = dict(task2)
+            task2.pop('time')
+
+            return (task1 == task2)
+
+        def _are_same_task_history(task_history1, task_history2):
+            for task1, task2 in zip(task_history1, task_history2):
+                if not _are_same_task(task1, task2):
+                    return False
+
+                return True
+
+        wflw2_keys = wflw2.extra_data.keys()
+        for key, value1 in self.extra_data.items():
+            if key not in wflw2.extra_data:
+                return False
+
+            wflw2_keys.pop(wflw2_keys.index(key))
+
+            value2 = wflw2.extra_data[key]
+            if key == '_task_history':
+                return _are_same_task_history(
+                    self.extra_data['_task_history'],
+                    wflw2.extra_data['_task_history'],
+                )
+
+            if value1 != value2:
+                return False
+
+        if wflw2_keys:
+            return False
+
+        return True
+
     def __eq__(self, other):
-        """Enable equal operators on WorkflowObjects."""
+        """Enable equal operators on WorkflowObjects.
+
+        ..Note: The task history timestamps are not taken into account.
+        """
         if isinstance(other, WorkflowObject):
-            if self.data == other.data and \
-                    self.extra_data == other.extra_data and \
-                    self.id_workflow == other.id_workflow and \
-                    self.status == other.status and \
-                    self.id_parent == other.id_parent and \
-                    isinstance(self.created, datetime) and \
-                    isinstance(self.modified, datetime):
+            if (
+                self.data == other.data and
+                self.id_workflow == other.id_workflow and
+                self.status == other.status and
+                self.id_parent == other.id_parent and
+                isinstance(self.created, datetime) and
+                isinstance(self.modified, datetime) and
+                self._has_same_extra_data(other)
+            ):
                 return True
             else:
                 return False
