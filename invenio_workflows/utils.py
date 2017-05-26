@@ -19,6 +19,8 @@
 
 """Various utility functions for use across the workflows module."""
 
+import datetime
+
 from six import text_type, string_types
 
 from werkzeug import import_string
@@ -66,7 +68,8 @@ def get_func_info(func):
         "nicename": nicename,
         "doc": doc,
         "parameters": parameters,
-        "name": name
+        "name": name,
+        "time": str(datetime.datetime.now()),
     })
 
 
