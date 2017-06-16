@@ -169,7 +169,7 @@ class WorkflowObjectModel(db.Model):
     _id_workflow = db.Column(UUIDType,
                              db.ForeignKey("workflows_workflow.uuid",
                                            ondelete='CASCADE'),
-                             nullable=True, name="id_workflow")
+                             nullable=True, name="id_workflow", index=True)
 
     status = db.Column(ChoiceType(ObjectStatus, impl=db.Integer()),
                        default=ObjectStatus.INITIAL, nullable=False,
@@ -177,7 +177,7 @@ class WorkflowObjectModel(db.Model):
 
     id_parent = db.Column(db.Integer, db.ForeignKey("workflows_object.id",
                                                     ondelete='CASCADE'),
-                          default=None)
+                          default=None, index=True)
 
     child_objects = db.relationship("WorkflowObjectModel",
                                     remote_side=[id_parent])
