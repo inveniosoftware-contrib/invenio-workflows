@@ -18,6 +18,8 @@
 
 """Mediator between API and workers responsible for running the workflows."""
 
+import uuid
+
 from invenio_db import db
 
 from .engine import WorkflowEngine
@@ -25,7 +27,7 @@ from .models import Workflow
 from .proxies import workflow_object_class
 
 
-def run_worker(wname, data, **kwargs):
+def run_worker(wname, data, engine_uuid_hex=None, **kwargs):
     """Run a workflow by name with list of data objects.
 
     The list of data can also contain WorkflowObjects.
@@ -38,17 +40,24 @@ def run_worker(wname, data, **kwargs):
     :param data: objects to run through the workflow.
     :type data: list
 
+    :param engine_uuid_hex: hex string of the uuid of the engine to use, if
+        not passed will create a new one.
+    :type data: str
+
     :return: WorkflowEngine instance
     """
     if 'stop_on_halt' not in kwargs:
         kwargs['stop_on_halt'] = False
 
-    engine = WorkflowEngine.with_name(wname, **kwargs)
-    engine.save()
+    if engine_uuid_hex:
+        engine_uuid = uuid.UUID(hex=engine_uuid_hex)
+        engine = WorkflowEngine.from_uuid(uuid=engine_uuid, **kwargs)
+    else:
+        engine = WorkflowEngine.with_name(wname, **kwargs)
+        engine.save()
+
     objects = get_workflow_object_instances(data, engine)
-
     db.session.commit()
-
     engine.process(objects, **kwargs)
     return engine
 
