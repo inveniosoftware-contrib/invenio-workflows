@@ -89,10 +89,10 @@ class Workflow(db.Model):
                 str(self.id_user), str(self.status))
 
     @classmethod
-    def delete(cls, uuid=None):
+    def delete(cls, uuid):
         """Delete a workflow."""
-        uuid = uuid or cls.uuid
-        db.session.delete(Workflow.query.get(uuid))
+        to_delete = Workflow.query.get(uuid)
+        db.session.delete(to_delete)
 
     def save(self, status=None):
         """Save object to persistent storage."""
