@@ -161,7 +161,8 @@ def get_workflow_object_instances(data, engine):
         if isinstance(
             data_object, workflow_object_class._get_current_object()
         ):
-            data_object.data_type = data_type
+            if not data_object.data_type:
+                data_object.data_type = data_type
 
             if data_object.id:
                 data_object.log.debug("Existing workflow object found for "
