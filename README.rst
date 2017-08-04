@@ -1,6 +1,6 @@
 ..
     This file is part of Invenio.
-    Copyright (C) 2015, 2016 CERN.
+    Copyright (C) 2015, 2016, 2017 CERN.
 
     Invenio is free software; you can redistribute it
     and/or modify it under the terms of the GNU General Public License as
@@ -25,20 +25,11 @@
  Invenio-Workflows
 ===================
 
-.. image:: https://img.shields.io/travis/inveniosoftware/invenio-workflows.svg
-        :target: https://travis-ci.org/inveniosoftware/invenio-workflows
+.. image:: https://img.shields.io/travis/inveniosoftware-contrib/invenio-workflows.svg
+        :target: https://travis-ci.org/inveniosoftware-contrib/invenio-workflows
 
-.. image:: https://img.shields.io/coveralls/inveniosoftware/invenio-workflows.svg
-        :target: https://coveralls.io/r/inveniosoftware/invenio-workflows
-
-.. image:: https://img.shields.io/github/tag/inveniosoftware/invenio-workflows.svg
-        :target: https://github.com/inveniosoftware/invenio-workflows/releases
-
-.. image:: https://img.shields.io/pypi/dm/invenio-workflows.svg
-        :target: https://pypi.python.org/pypi/invenio-workflows
-
-.. image:: https://img.shields.io/github/license/inveniosoftware/invenio-workflows.svg
-        :target: https://github.com/inveniosoftware/invenio-workflows/blob/master/LICENSE
+.. image:: https://img.shields.io/coveralls/inveniosoftware-contrib/invenio-workflows.svg
+        :target: https://coveralls.io/r/inveniosoftware-contrib/invenio-workflows
 
 
 Invenio module for running persistent workflows.
