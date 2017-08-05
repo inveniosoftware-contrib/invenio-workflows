@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2016 CERN.
+# Copyright (C) 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -65,8 +65,7 @@ INSTALL_REQUIRES = [
     'invenio-files-rest>=1.0.0a3',
     'invenio-records-files>=1.0.0a5',
     'invenio-db>=1.0.0a9',
-    # FIXME: Enable this when workflow is released
-    # 'workflow>=2.0.0',
+    'workflow~=2.0,>=2.0.1',
 ]
 
 PACKAGES = find_packages()
