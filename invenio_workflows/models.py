@@ -85,7 +85,7 @@ class Workflow(db.Model):
         """Represent a workflow object."""
         return "<Workflow(name: %s, cre: %s, mod: %s," \
                "id_user: %s, status: %s)>" % \
-               (str(self.name),  str(self.created), str(self.modified),
+               (str(self.name), str(self.created), str(self.modified),
                 str(self.id_user), str(self.status))
 
     @classmethod
