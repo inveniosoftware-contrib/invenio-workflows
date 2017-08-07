@@ -59,7 +59,7 @@ class WorkflowObject(object):
     @staticproperty
     def known_columns():  # pylint: disable=no-method-argument
         """Get type for object status."""
-        return WorkflowObjectModel.__table__.columns.keys()
+        return list(WorkflowObjectModel.__table__.columns.keys())
 
     @staticproperty
     def dbmodel():  # pylint: disable=no-method-argument
@@ -226,7 +226,8 @@ class WorkflowObject(object):
 
                 return True
 
-        wflw2_keys = wflw2.extra_data.keys()
+        # python 2 and 3 to get the keys
+        wflw2_keys = list(wflw2.extra_data)
         for key, value1 in self.extra_data.items():
             if key not in wflw2.extra_data:
                 return False
