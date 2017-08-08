@@ -39,7 +39,7 @@ if not os.path.exists('_build/html/_static'):
     os.makedirs('_build/html/_static')
 
 
-with open('_build/html/_static/CHANGELOG.txt', 'w') as changelog_fd:
+with open('_build/html/_static/CHANGELOG.txt', 'wb') as changelog_fd:
     changelog_fd.write(
         get_changelog(
             project_dir='..',
@@ -51,7 +51,7 @@ with open('_build/html/_static/CHANGELOG.txt', 'w') as changelog_fd:
     )
 
 
-with open('_build/html/_static/AUTHORS.txt', 'w') as changelog_fd:
+with open('_build/html/_static/AUTHORS.txt', 'wb') as changelog_fd:
     changelog_fd.write(
         '\n'.join(get_authors(project_dir='..')).encode('utf-8')
     )

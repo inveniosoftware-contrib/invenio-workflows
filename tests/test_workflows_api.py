@@ -155,6 +155,32 @@ def test_equality(app, halt_workflow):
         assert obj4 != obj3
 
 
+@pytest.mark.parametrize(
+    'obj1, obj2',
+    [
+        ({'x': 22}, {}),
+        ({}, {'x': 22}),
+        ({'x': 22}, {'y': 22}),
+        ({'x': 22}, {'x': 21}),
+    ],
+    ids=[
+        'key only on left side',
+        'key only on right side',
+        'mismatched key',
+        'mismatched value',
+    ]
+)
+def test_inequality(obj1, obj2, app, halt_workflow):
+    """Test WorkflowObject inequality functions."""
+    with app.app_context():
+        obj1 = WorkflowObject.create(obj1)
+        obj2 = WorkflowObject.create(obj2)
+        start("halttest", [obj1, obj2])
+
+        assert obj1 != obj2
+        assert obj2 != obj1
+
+
 def test_create_with_default_extra_data(app):
     """Test that the extra data dictionary is not shared between
     workflow instances."""
