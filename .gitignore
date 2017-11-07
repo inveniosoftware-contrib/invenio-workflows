@@ -22,3 +22,9 @@ docs/_build
 
 # vim swapfiles
 .*.sw?
+
+# IDE
+.idea/*
+
+AUTHORS
+CHANGELOG
