@@ -100,6 +100,9 @@ setup(
         'invenio_celery.tasks': [
             'invenio_workflows = invenio_workflows.tasks',
         ],
+        'invenio_db.alembic': [
+            'invenio_workflows = invenio_workflows:alembic',
+        ],
         'invenio_db.models': [
             'invenio_workflows = invenio_workflows.models',
         ],
