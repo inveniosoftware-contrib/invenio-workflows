@@ -82,11 +82,15 @@ class Workflow(db.Model):
                               cascade="all, delete-orphan")
 
     def __repr__(self):
-        """Represent a workflow object."""
+        """Represent a Workflow instance."""
         return "<Workflow(name: %s, cre: %s, mod: %s," \
                "id_user: %s, status: %s)>" % \
                (str(self.name), str(self.created), str(self.modified),
                 str(self.id_user), str(self.status))
+
+    def __str__(self):
+        """Represent a Workflow instance."""
+        return self.__repr__()
 
     @classmethod
     def delete(cls, uuid):
@@ -217,11 +221,15 @@ class WorkflowObjectModel(db.Model):
         self._id_workflow = str(value) if value else None
 
     def __repr__(self):
-        """Represent a WorkflowObject."""
-        return "<WorkflowObject(id = %s, id_workflow = %s, " \
+        """Represent a WorkflowObjectModel."""
+        return "<WorkflowObjectModel(id = %s, id_workflow = %s, " \
                "status = %s, id_parent = %s, created = %s, )" \
                % (str(self.id), str(self.id_workflow), str(self.status),
                   str(self.id_parent), str(self.created))
+
+    def __str__(self):
+        """Represent a WorkflowObjectModel."""
+        return self.__repr__()
 
 
 __all__ = ('Workflow', 'WorkflowObjectModel')
