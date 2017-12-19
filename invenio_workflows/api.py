@@ -206,8 +206,11 @@ class WorkflowObject(object):
 
     def __repr__(self):
         """Represent a WorkflowObject."""
-        if self.model:
-            return self.model.__repr__()
+        return "<WorkflowObject(model = %s)" % self.model
+
+    def __str__(self):
+        """Represent a WorkflowObject."""
+        return self.__repr__()
 
     def _has_same_extra_data(self, wflw2):
 
