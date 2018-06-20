@@ -27,14 +27,6 @@ services:
       - POSTGRES_USER=workflows
       - PGDATA=/var/lib/postgresql/data/pgdata
 
-  mysql:
-    image: mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=dbpass123
-      - MYSQL_PASSWORD=dbpass123
-      - MYSQL_USER=workflows
-      - MYSQL_DATABASE=workflows
-
   test-py27:
     build:
       context: .
@@ -53,33 +45,18 @@ services:
     environment:
       - SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://workflows:dbpass123@postgres:5432/workflows
       - TOXENV=py27postgres
-  test-py27mysql:
-    extends:
-      service: test-py27
-    depends_on:
-      - mysql
-    environment:
-      - SQLALCHEMY_DATABASE_URI=mysql+pymysql://workflows:dbpass123@mysql:3306/workflows
-      - TOXENV=py27mysql
 
-  test-py35:
+  test-py36:
     extends: test-py27
     build:
       context: .
-      dockerfile: tests/Dockerfile.py35
+      dockerfile: tests/Dockerfile.py36
     environment:
-      - TOXENV=py35
-  test-py35mysql:
-    extends: test-py35
-    depends_on:
-      - mysql
-    environment:
-      - SQLALCHEMY_DATABASE_URI=mysql+pymysql://workflows:dbpass123@mysql:3306/workflows
-      - TOXENV=py35mysql
-  test-py35postgres:
-    extends: test-py35
+      - TOXENV=py36
+  test-py36postgres:
+    extends: test-py36
     depends_on:
       - postgres
     environment:
       - SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://workflows:dbpass123@postgres:5432/workflows
-      - TOXENV=py35postgres
+      - TOXENV=py36postgres

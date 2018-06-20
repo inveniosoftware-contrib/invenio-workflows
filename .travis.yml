@@ -45,12 +45,10 @@ env:
     - SUITE=py27
       # this ^ suite includes the pep8, packaging, docs, doctests, docstyle
       # and py27 tox environment runs
-    - SUITE=py27mysql
     - SUITE=py27postgres
 
-    - SUITE=py35
-    - SUITE=py35mysql
-    - SUITE=py35postgres
+    - SUITE=py36
+    - SUITE=py36postgres
 
 before_install:
   - "travis_retry pip install --upgrade pip setuptools coveralls"
