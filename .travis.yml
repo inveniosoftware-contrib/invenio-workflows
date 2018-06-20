@@ -69,15 +69,15 @@ before_install:
   - autosemver . changelog
 
 install:
-  - "travis_retry docker-compose -f docker-compose.tests.yaml pull"
-  - "travis_retry docker-compose -f docker-compose.tests.yaml build test-$SUITE"
+  - "travis_retry docker-compose -f docker-compose.test.yml pull"
+  - "travis_retry docker-compose -f docker-compose.test.yml build test-$SUITE"
 
 script:
-  - docker-compose -f docker-compose.tests.yaml run --rm "test-$SUITE"
+  - docker-compose -f docker-compose.test.yml run --rm "test-$SUITE"
 
 after_script:
-  - "docker-compose -f docker-compose.tests.yaml kill"
-  - "docker-compose -f docker-compose.tests.yaml rm -f"
+  - "docker-compose -f docker-compose.test.yml kill"
+  - "docker-compose -f docker-compose.test.yml rm -f"
 
 after_success:
   # Coverage report contains Docker paths. We replace them, so that we can run Coveralls.
