@@ -1,0 +1,2 @@
+# see https://github.com/dulwich/dulwich/issues/637
+dulwich<0.19.3
