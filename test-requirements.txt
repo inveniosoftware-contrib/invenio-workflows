@@ -8,4 +8,8 @@ pytest-cache>=1.0
 pytest-cov>=1.8.0
 pytest-pep8>=1.0.6
 pytest>=2.8.0
+# SQLAlchemy-Continuum==1.3.5 breaks our code (connection broker), see:
+# https://its.cern.ch/jira/browse/INSPIR-831
+# https://github.com/kvesteri/sqlalchemy-continuum/issues/187
+SQLAlchemy-Continuum==1.3.4
 invenio-db[versioning]>=1.0.0a9
