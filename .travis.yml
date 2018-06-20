@@ -45,12 +45,10 @@ env:
     - SUITE=py27
       # this ^ suite includes the pep8, packaging, docs, doctests, docstyle
       # and py27 tox environment runs
-    - SUITE=py27mysql
     - SUITE=py27postgres
 
-    - SUITE=py35
-    - SUITE=py35mysql
-    - SUITE=py35postgres
+    - SUITE=py36
+    - SUITE=py36postgres
 
 before_install:
   - "travis_retry pip install --upgrade pip setuptools coveralls"
@@ -69,15 +67,15 @@ before_install:
   - autosemver . changelog
 
 install:
-  - "travis_retry docker-compose -f docker-compose.tests.yaml pull"
-  - "travis_retry docker-compose -f docker-compose.tests.yaml build test-$SUITE"
+  - "travis_retry docker-compose -f docker-compose.test.yml pull"
+  - "travis_retry docker-compose -f docker-compose.test.yml build test-$SUITE"
 
 script:
-  - docker-compose -f docker-compose.tests.yaml run --rm "test-$SUITE"
+  - docker-compose -f docker-compose.test.yml run --rm "test-$SUITE"
 
 after_script:
-  - "docker-compose -f docker-compose.tests.yaml kill"
-  - "docker-compose -f docker-compose.tests.yaml rm -f"
+  - "docker-compose -f docker-compose.test.yml kill"
+  - "docker-compose -f docker-compose.test.yml rm -f"
 
 after_success:
   # Coverage report contains Docker paths. We replace them, so that we can run Coveralls.

@@ -41,7 +41,7 @@ from .errors import WorkflowsMissingObject, WorkflowsMissingModel
 from .proxies import workflows
 from .signals import workflow_object_after_save, workflow_object_before_save
 from .utils import get_func_info
-from .models import ObjectStatus, WorkflowObjectModel
+from .models import ObjectStatus, WorkflowObjectModel, Workflow
 
 
 class WorkflowObject(object):
@@ -108,7 +108,8 @@ class WorkflowObject(object):
                 self.model.status = status
 
             if id_workflow is not None:
-                self.model.id_workflow = id_workflow
+                workflow = Workflow.query.filter_by(uuid=id_workflow).one()
+                self.model.workflow = workflow
 
             # Special handling of JSON fields to mark update
             if self.model.callback_pos is None:
