@@ -20,6 +20,7 @@
 """Various utility functions for use across the workflows module."""
 
 import datetime
+import socket
 
 from six import text_type, string_types
 
@@ -70,6 +71,7 @@ def get_func_info(func):
         "parameters": parameters,
         "name": name,
         "time": str(datetime.datetime.now()),
+        "hostname": socket.gethostname(),
     })
 
 
