@@ -29,7 +29,7 @@ from setuptools import find_packages, setup
 README = open('README.rst').read()
 
 TESTS_REQUIRE = [
-    'celery>4.0,==4.3.0',
+    'celery>=4.3.0',
     'check-manifest>=0.25',
     'coverage>=4.0',
     'isort>=4.2.2',
@@ -46,6 +46,16 @@ EXTRAS_REQUIRE = {
         'Sphinx>=1.5.1,<1.6',
     ],
     'tests': TESTS_REQUIRE,
+# Database version
+    'postgresql': [
+        'invenio-db[postgresql,versioning]',
+    ],
+    'mysql': [
+        'invenio-db[mysql,versioning]',
+    ],
+    'sqlite': [
+        'invenio-db[versioning]',
+    ],
 }
 
 EXTRAS_REQUIRE['all'] = []
@@ -64,7 +74,6 @@ INSTALL_REQUIRES = [
     'blinker>=1.4',
     'invenio-files-rest>=1.0.0a3',
     'invenio-records-files>=1.0.0a5',
-    'invenio-db>=1.0.0a9',
     'workflow~=2.0,>=2.0.1',
 ]
 
