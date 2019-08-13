@@ -260,13 +260,13 @@ class WorkflowObject(object):
         """
         if isinstance(other, WorkflowObject):
             if (
-                self.data == other.data and
-                self.id_workflow == other.id_workflow and
-                self.status == other.status and
-                self.id_parent == other.id_parent and
-                isinstance(self.created, datetime) and
-                isinstance(self.modified, datetime) and
-                self._has_same_extra_data(other)
+                self.data == other.data
+                and self.id_workflow == other.id_workflow
+                and self.status == other.status
+                and self.id_parent == other.id_parent
+                and isinstance(self.created, datetime)
+                and isinstance(self.modified, datetime)
+                and self._has_same_extra_data(other)
             ):
                 return True
             else:

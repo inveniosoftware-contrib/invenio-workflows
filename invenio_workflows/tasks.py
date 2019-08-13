@@ -23,12 +23,19 @@ from __future__ import absolute_import, print_function
 
 from celery import shared_task
 from six import text_type
+from sqlalchemy.exc import OperationalError
 
 from .errors import WorkflowsMissingData, WorkflowsMissingObject
 
 
-@shared_task
-def start(workflow_name, data=None, object_id=None, **kwargs):
+@shared_task(
+    bind=True,
+    retry_jitter=False,
+    autoretry_for=(OperationalError,),
+    retry_backoff=True,
+    max_retries=6
+)
+def start(self, workflow_name, data=None, object_id=None, **kwargs):
     """Start a workflow by given name for specified data.
 
     The name of the workflow to start is considered unique and it is
