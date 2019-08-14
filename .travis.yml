@@ -80,4 +80,3 @@ deploy:
   distributions: "sdist"
   on:
     python: "3.6"
-    condition: "$SUITE == postgres"
