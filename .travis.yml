@@ -23,7 +23,7 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 addons:
-  postgresql: 9.3
+  postgresql: 9.4
 
 notifications:
   email: false
@@ -36,46 +36,34 @@ cache:
   - pip
 
 services:
-  - docker
+  - postgresql
+
+python:
+  - 2.7
+  - 3.6
 
 env:
   global:
-    - DOCKER_COMPOSE_VERSION=1.13.0
+    - _EXTRAS=docs,dev,tests
   matrix:
-    - SUITE=py27
-      # this ^ suite includes the pep8, packaging, docs, doctests, docstyle
-      # and py27 tox environment runs
-    - SUITE=py27postgres
-
-    - SUITE=py36
-    - SUITE=py36postgres
+    - EXTRAS="$_EXTRAS,postgresql" SQLALCHEMY_DATABASE_URI=postgres+psycopg2://postgres@localhost:5432/workflows
+    - EXTRAS="$_EXTRAS,sqlite"
 
 before_install:
-  - "travis_retry pip install --upgrade pip setuptools coveralls"
-# FIXME: span also all the requirement levels in the matrix
-#  - "requirements-builder -e all --level=min setup.py > .travis-lowest-requirements.txt"
-#  - "requirements-builder -e all --level=pypi setup.py > .travis-release-requirements.txt"
-#  - "requirements-builder -e all --level=dev --req requirements-devel.txt setup.py > .travis-devel-requirements.txt"
-  # Add docker-compose at the version specified in ENV.
-  - sudo rm /usr/local/bin/docker-compose
-  - curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" > docker-compose
-  - chmod +x docker-compose
-  - sudo mv docker-compose /usr/local/bin
-  - pip install --upgrade pip setuptools
-  - pip install "autosemver>=0.1.9"
+  - "travis_retry pip install --upgrade pip setuptools py"
+  - "travis_retry pip install twine wheel coveralls autosemver tox-travis"
   - autosemver . version
   - autosemver . changelog
 
 install:
-  - "travis_retry docker-compose -f docker-compose.test.yml pull"
-  - "travis_retry docker-compose -f docker-compose.test.yml build test-$SUITE"
+  - "travis_retry pip install -r requirements-devel.txt"
+  - "travis_retry pip install .[$EXTRAS]"
+
+before_script:
+  - psql -c 'create database workflows;' -U postgres
 
 script:
-  - docker-compose -f docker-compose.test.yml run --rm "test-$SUITE"
-
-after_script:
-  - "docker-compose -f docker-compose.test.yml kill"
-  - "docker-compose -f docker-compose.test.yml rm -f"
+  - "./run-tests.sh"
 
 after_success:
   # Coverage report contains Docker paths. We replace them, so that we can run Coveralls.
@@ -91,4 +79,5 @@ deploy:
     secure: lD3uH3wJi/i+wCV/tHUA7i4FvGZ2LzDtMmSphjht9FmTnO+CiKAgNG9BvtGa9ofvX/wK/Dl97ipAQcY30tSTtEbxZF9XSKJA82xjpWZY92vqgbKIio5ZkDuZfxTRsY9L+pSjswptRcZ7AHQdpbiyKHwS51wP4GwA2GTtW2/VXxLiyKL7RHtrzTOARpgmGEd1+EB5oPrsWN0gfR0bxqyWgIvYBD4MEkUvZb31OuKq/opVTDvW+NrZfC/K19TbULbBmAK4jUnv3z1ushCCq47241Vg457zhdr7nn0gsbwuvY+vSdKBvSMp53iElovVU3KsR0k24SS1cfpVnYTKjhEKpDHmBaIBiMZG2YXgzCTNB5V3+cQNPJHtsLdFHMlnigtIPx0af71wQtMd/I4B/wD9Uy3u+n8/c06XLgn5M1aoUWbQ9TyeJ4ZQUrh7aFtXPxOMbJpvBBnIK1GOIMEz2WMEmqRBsA5tIZiCdc8IGOklAC19+9h7tyKziCZcgmlGI6LwQiwEDwn20vTJkpli6VYObeM0vBsTW0TuU/m9SmA4efvsxLcMFOUl6d+k0ORlK/If/lgJ2ionybd5/rtMb6YpyuoVxgz/QRn/q0Urr778ydLPTonXZsobKDFtH3l8LPlRlOxNuVzphjlTgVl0AIfNicpiQyUTvckNPun9NLVXqaw=
   distributions: "sdist"
   on:
-    python: "2.7"
+    python: "3.6"
+    condition: "$SUITE == postgres"
